@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS HiPeer;
+ \connect HiPeer;
+CREATE SCHEMA Client;
