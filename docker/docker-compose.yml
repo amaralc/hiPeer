@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   postgres:
-    image: postgres:${POSTGRESVERSION:-alpine}
+    image: postgres:${POSTGRES_VERSION:-alpine}
     restart: always
     volumes: 
       #- "postgresdata:/data/db/"
@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
 
   adminer:
-    image: adminer:${ADMINERVERSION:-latest}
+    image: adminer:${ADMINER_VERSION:-latest}
     restart: always
     depends_on:
       - postgres
@@ -44,7 +44,7 @@ services:
       MONGO_INITDB_DATABASE: hipeer
 
   mongo-express:
-    image: mongo-express:${MONGOEXPRESSVERSION:-latest}
+    image: mongo-express:${MONGOEXPRESS_VERSION:-latest}
     restart: always
     depends_on:
       - mongo
