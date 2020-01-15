@@ -35,15 +35,19 @@ void setup() {
   // start 'LED_BUILTIN' as output
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // start digital 'containerPins' as output
+  // initiate 'containerPins' as output and blink each container once for visual confirmation
   for (int i = 0; i <= clusterSize - 1; i++) {
+
+    // initiate containerPin as output
     pinMode(containerPins[i], OUTPUT);
 
-    // blink 'LED_BUILTIN' for visual confirmation at 1/50ms
+    // blink 'LED_BUILTIN' and container
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
+    digitalWrite(containerPins[i], HIGH);
+    delay(200);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(50);
+    digitalWrite(containerPins[i], LOW);
+    
   }
   
   // message user to validate session
