@@ -14,8 +14,19 @@ const int ledButton = 53;
 int ledButtonState = LOW;
 
 // define pino que envia sinal para LEDs
-const int ledSignal = 52;
+int ledSignal = 52;
 
+// define estado do container;
+int containerState = 0;
+
+// string to hold input
+String inputString = "";    
+
+// define array with container pins
+int containerPins[12] = {28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50};
+
+// define variable to hold container pin number
+int containerPin;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -34,21 +45,60 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
 
-
-  // faz leitura do ledButton
-  ledButtonState = digitalRead(ledButton);
   
 
+  if (containerState == 1){
+    digitalWrite(containerPin,HIGH);  
+    delay(100);
+    digitalWrite(containerPin, LOW); 
+    delay(100);
+    containerState = 0;
+  } 
 
+  // Read serial input:
+  while (Serial.available() > 0) {
+    int inputChar = Serial.read();
+    if (isDigit(inputChar)) {
+      // convert the incoming byte to a char and add it to the string:
+      inputString += (char)inputChar;
+    }
+    // if you get a newline, print the string, then the string's value:
+    if (inputChar == '\n') {
+      Serial.print("Value:");
+      Serial.println(inputString.toInt());
+
+      // define 'containerPin' according to user input
+      containerPin = containerPins[inputString.toInt() - 1];
+      Serial.print("Container pin number:");
+      Serial.println(containerPin);
+      pinMode(containerPin, OUTPUT);
+      containerState = 1;
+            
+      // clear the string for new input:
+      inputString = "";
+    }
+  }
+
+  // faz leitura do ledButton e aguarda para manter estabilidade
+  ledButtonState = digitalRead(ledButton);  
+  delay(300);
 
   // if ledButton active
   if (ledButtonState == HIGH){
 
+    if (containerState == 0){
+      containerState = 1;
+    } else {
+      containerState = 0;    
+    }      
+
+    
+
     // set ledSignal to high
-    digitalWrite(ledSignal, HIGH);
+    //digitalWrite(ledSignal, HIGH);
 
     // print out the state of the button:
-    Serial.println(ledButtonState);
+    // Serial.println(ledButtonState);
 
     // delay in between reads for stability
     delay(1);        
@@ -56,7 +106,7 @@ void loop() {
   } else {
 
     // set ledSignal to low
-    digitalWrite(ledSignal, LOW); 
+    // digitalWrite(ledSignal, LOW); 
 
     // delay in between reads for stability
     delay(1);   
