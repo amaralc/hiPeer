@@ -2,12 +2,11 @@
 
   hiPeer
 
-  Turn specific LEDs on for 100ms
+  Turn specificied LEDs ON and OFF
 
-  Created 15 Jan 2020
-  
-  by Calil Amaral
-  
+  Created 13 Jan 2020 by Calil Amaral
+  Updated 15 Jan 2020 by Calil Amaral
+
 */
 
 // User info
