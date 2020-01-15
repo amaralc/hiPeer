@@ -17,7 +17,8 @@ int userState = 0;        // store user status (1 - valid, 0 - invalid)
 String inputString = "";  // string to hold user input  
 
 // Container info
-int containerPins[12] = {28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50}; // define array with container pins
+const int clusterSize = 12;
+int containerPins[clusterSize] = {28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50}; // define array with container pins
 int containerSignalPin = 28;                                              // define pino que envia sinal para LEDs (default = 28);
 int containerState = 0;                                                   // define estado do container;
 int containerPin;                                                         // define variable to hold container pin number
@@ -31,9 +32,20 @@ void setup() {
   // start digital pin 'ledButton' as input
   pinMode(ledButton, INPUT);
 
-  // start digital pin 'containerSignalPin' as output'
-  pinMode(containerSignalPin, OUTPUT);
+  // start 'LED_BUILTIN' as output
+  pinMode(LED_BUILTIN, OUTPUT);
 
+  // start digital 'containerPins' as output
+  for (int i = 0; i <= clusterSize - 1; i++) {
+    pinMode(containerPins[i], OUTPUT);
+
+    // blink 'LED_BUILTIN' for visual confirmation at 1/50ms
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(50);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+  }
+  
   // message user to validate session
   Serial.println("Click the button to validate new session");
   
@@ -81,8 +93,6 @@ void loop() {
         Serial.print("Container pin number:");
         Serial.println(containerPin);
   
-        // set pin to output (NOT RECOMMENDED - MOVE TO SETUP!!!!!!!)
-        pinMode(containerPin, OUTPUT); // (NOT RECOMMENDED - DEFINE PINS IN SETUP IN NEXT REVIEW!!!!!!)
         if (userState == 1){
           containerState = 1;        
         }   
