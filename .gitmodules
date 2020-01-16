@@ -1,0 +1,3 @@
+[submodule "src/api_client"]
+	path = src/api_client
+	url = https://github.com/amaralc/hiPeer-gostack
