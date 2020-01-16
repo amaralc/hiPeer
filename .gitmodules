@@ -1,3 +1,6 @@
 [submodule "business"]
 	path = business
 	url = https://github.com/amaralc/hiPeer-b
+[submodule "src/api_client"]
+	path = src/api_client
+	url = https://github.com/amaralc/hiPeer-gostack
