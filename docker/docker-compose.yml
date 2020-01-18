@@ -1,0 +1,63 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-alpine}
+    restart: always
+    volumes: 
+      #- "postgresdata:/data/db/"
+      - type: bind
+        source: .\volumes\postgres\data\
+        target: "/data/db/"
+    ports:
+      - 5432:5432
+    # networks:
+    #   - backend
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
+
+  adminer:
+    image: adminer:${ADMINER_VERSION:-latest}
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    # networks:
+    #   - backend
+
+  mongo:
+    image: mongo:${MONGO_VERSION:-bionic}
+    restart: always
+    volumes: 
+      #- "mongodata:/data/db/"
+      - type: bind
+        source: .\volumes\mongo\data\
+        target: "/data/db/"
+    # networks:
+    #   - backend
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:?err}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?err}
+      MONGO_INITDB_DATABASE: hipeer
+
+  mongo-express:
+    image: mongo-express:${MONGOEXPRESS_VERSION:-latest}
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    # networks:
+    #   - backend
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:?err}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:?err}
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_SERVER: mongo
+      
+# volumes:
+#   postgresdata:
+#   mongodata:

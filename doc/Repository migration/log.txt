@@ -1,0 +1,65 @@
+*   6c5fe20 - Thu, 16 Jan 2020 19:57:35 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 19:57:35 -0300)  (HEAD -> dev, origin/dev)
+|\            Merge pull request #7 from amaralc/feature/adding-business-submodule
+| |           - amaralc <32170099+amaralc@users.noreply.github.com>  (committer: GitHub <noreply@github.com>)
+| *   b5cfe55 - Thu, 16 Jan 2020 19:53:25 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 19:53:25 -0300)  (origin/feature/adding-business-submodule)
+| |\            Merge branch 'dev' into feature/adding-business-submodule
+| |/            - Elias Luiz da Silva Júnior <eliasluizjr@gmail.com>  (committer: GitHub <noreply@github.com>)
+|/|   
+* |   ad19fb0 - Thu, 16 Jan 2020 19:50:29 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 19:50:29 -0300) 
+|\ \            Merge pull request #6 from amaralc/feature/adding-api-client-submodule
+| | |           - amaralc <32170099+amaralc@users.noreply.github.com>  (committer: GitHub <noreply@github.com>)
+| * | 3dd30d2 - Thu, 16 Jan 2020 19:13:53 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 19:14:33 -0300)  (origin/feature/adding-api-client-submodule)
+| | |           Backend: Adding api_client submodule
+| | |           - Elias Júnior <eliasluizjr@gmail.com>  (committer: Elias Júnior <eliasluizjr@gmail.com>)
+| | * 1a78d0c - Thu, 16 Jan 2020 19:16:59 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 19:16:59 -0300) 
+| |/            Business: Adding business submodule
+|/|             - Elias Júnior <eliasluizjr@gmail.com>  (committer: Elias Júnior <eliasluizjr@gmail.com>)
+* |   d036094 - Thu, 16 Jan 2020 14:26:40 -0300 (2 days ago) (committed: Thu, 16 Jan 2020 14:26:40 -0300) 
+|\ \            Merge pull request #5 from amaralc/feature/activate-containers-individually
+| | |           - amaralc <32170099+amaralc@users.noreply.github.com>  (committer: GitHub <noreply@github.com>)
+| * | ea259ab - Wed, 15 Jan 2020 20:42:16 -0300 (3 days ago) (committed: Wed, 15 Jan 2020 20:42:16 -0300)  (origin/feature/activate-containers-individually)
+| | |           Documentation - updated file header
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | 4e5afab - Wed, 15 Jan 2020 06:51:11 -0300 (3 days ago) (committed: Wed, 15 Jan 2020 06:51:11 -0300) 
+| | |           Firmware - envia mensagem de erro caso usuario selecione numero invalido
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | c142c0c - Wed, 15 Jan 2020 06:22:50 -0300 (4 days ago) (committed: Wed, 15 Jan 2020 06:22:50 -0300) 
+| | |           Firmware - pisca cada container uma vez durante inicializacao
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | 966f4a5 - Wed, 15 Jan 2020 06:08:38 -0300 (4 days ago) (committed: Wed, 15 Jan 2020 06:08:38 -0300) 
+| | |           Firmware - pinMode functions movidas para setup()
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | 3dc6f58 - Wed, 15 Jan 2020 05:54:54 -0300 (4 days ago) (committed: Wed, 15 Jan 2020 05:54:54 -0300) 
+| | |           Firmware - update circuit schematics
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | f6d263a - Wed, 15 Jan 2020 05:43:38 -0300 (4 days ago) (committed: Wed, 15 Jan 2020 05:43:38 -0300) 
+| | |           Firmware - solicita ativacao de usuario antes de ativacao do container
+| | |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * | afae8f0 - Wed, 15 Jan 2020 04:34:09 -0300 (4 days ago) (committed: Wed, 15 Jan 2020 04:34:09 -0300) 
+|/ /            Firmware - le input pelo monitor serial e aciona porta correspondente
+| |             - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+* |   bbcaef6 - Mon, 13 Jan 2020 22:05:54 -0300 (5 days ago) (committed: Mon, 13 Jan 2020 22:05:54 -0300) 
+|\ \            Merge pull request #3 from amaralc/infra/docker-initial-setup
+| | |           - amaralc <32170099+amaralc@users.noreply.github.com>  (committer: GitHub <noreply@github.com>)
+| * | 45e4c9f - Mon, 13 Jan 2020 19:39:28 -0300 (5 days ago) (committed: Mon, 13 Jan 2020 19:39:28 -0300)  (origin/infra/docker-initial-setup)
+| | |           Infraestrutura - Corrigindo nomes de variáveis de ambiente Docker
+| | |           - Elias Júnior <eliasluizjr@gmail.com>  (committer: Elias Júnior <eliasluizjr@gmail.com>)
+| * | ee37cb2 - Sun, 12 Jan 2020 20:35:11 -0300 (6 days ago) (committed: Sun, 12 Jan 2020 20:36:39 -0300) 
+| |/            Infraestrutura - setup de bancos de dados no docker
+| |             - Elias Júnior <eliasluizjr@gmail.com>  (committer: Elias Júnior <eliasluizjr@gmail.com>)
+* |   fc82c09 - Mon, 13 Jan 2020 19:56:39 -0300 (5 days ago) (committed: Mon, 13 Jan 2020 19:56:39 -0300) 
+|\ \            Merge pull request #2 from amaralc/firmware/one-button-all-containers
+| |/            - Elias Luiz da Silva Júnior <eliasluizjr@gmail.com>  (committer: GitHub <noreply@github.com>)
+|/|   
+| * 06ba9d2 - Mon, 13 Jan 2020 19:52:49 -0300 (5 days ago) (committed: Mon, 13 Jan 2020 19:52:49 -0300)  (origin/firmware/one-button-all-containers)
+| |           Delete .gitkeep
+| |           - Elias Luiz da Silva Júnior <eliasluizjr@gmail.com>  (committer: GitHub <noreply@github.com>)
+| * 5554607 - Mon, 13 Jan 2020 00:21:03 -0300 (6 days ago) (committed: Mon, 13 Jan 2020 00:21:03 -0300) 
+| |           code: primeira versao com um botao acionando todos os leds
+| |           - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+| * e23c7ce - Mon, 13 Jan 2020 00:17:04 -0300 (6 days ago) (committed: Mon, 13 Jan 2020 00:17:04 -0300) 
+|/            doc: estrutura de pastas
+|             - amaralc <amaral.calil@gmail.com>  (committer: amaralc <amaral.calil@gmail.com>)
+* 3fd9e49 - Sat, 4 Jan 2020 18:40:19 -0300 (2 weeks ago) (committed: Sat, 4 Jan 2020 18:43:19 -0300) 
+            Commit inicial
+            - Elias Júnior <eliasluizjr@gmail.com>  (committer: Elias Júnior <eliasluizjr@gmail.com>)

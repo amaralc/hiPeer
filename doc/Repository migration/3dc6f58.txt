@@ -1,0 +1,18 @@
+commit 3dc6f58b0eec013796e1a5ff6d7939183560bd27
+Author: amaralc <amaral.calil@gmail.com>
+Date:   Wed Jan 15 05:54:54 2020 -0300
+
+    Firmware - update circuit schematics
+
+diff --git a/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.PNG b/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.PNG
+new file mode 100644
+index 0000000..b5083bb
+Binary files /dev/null and b/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.PNG differ
+diff --git a/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.fzz b/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.fzz
+new file mode 100644
+index 0000000..e2eab53
+Binary files /dev/null and b/src/firmware/main/20200115_0553_firmware_each_container_individually_code_only.fzz differ
+diff --git a/src/firmware/main/schematics.PNG b/src/firmware/main/schematics.PNG
+deleted file mode 100644
+index 4f0a1ff..0000000
+Binary files a/src/firmware/main/schematics.PNG and /dev/null differ

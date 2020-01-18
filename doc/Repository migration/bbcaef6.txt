@@ -1,0 +1,9 @@
+commit bbcaef62b97061a94a5b1a6b104ae157577e93ed
+Merge: fc82c09 45e4c9f
+Author: amaralc <32170099+amaralc@users.noreply.github.com>
+Date:   Mon Jan 13 22:05:54 2020 -0300
+
+    Merge pull request #3 from amaralc/infra/docker-initial-setup
+    
+    Infraestrutura - Configuração inicial de Docker
+

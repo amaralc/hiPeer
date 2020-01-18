@@ -1,0 +1,27 @@
+commit ea259ab2f764a942605c45a1844dd64df6db8c51
+Author: amaralc <amaral.calil@gmail.com>
+Date:   Wed Jan 15 20:42:16 2020 -0300
+
+    Documentation - updated file header
+
+diff --git a/src/firmware/main/main.ino b/src/firmware/main/main.ino
+index 06b0364..923c8b1 100644
+--- a/src/firmware/main/main.ino
++++ b/src/firmware/main/main.ino
+@@ -2,12 +2,11 @@
+ 
+   hiPeer
+ 
+-  Turn specific LEDs on for 100ms
++  Turn specificied LEDs ON and OFF
++
++  Created 13 Jan 2020 by Calil Amaral
++  Updated 15 Jan 2020 by Calil Amaral
+ 
+-  Created 15 Jan 2020
+-  
+-  by Calil Amaral
+-  
+ */
+ 
+ // User info

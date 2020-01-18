@@ -1,0 +1,9 @@
+commit fc82c09cf6a418806495d2777b5a678aca4be2d9
+Merge: 3fd9e49 06ba9d2
+Author: Elias Luiz da Silva Júnior <eliasluizjr@gmail.com>
+Date:   Mon Jan 13 19:56:39 2020 -0300
+
+    Merge pull request #2 from amaralc/firmware/one-button-all-containers
+    
+    firmware: acionamento dos LEDs de todos os containers apernando um botao
+

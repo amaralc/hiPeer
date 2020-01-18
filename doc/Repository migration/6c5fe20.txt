@@ -1,0 +1,9 @@
+commit 6c5fe208d9dd8e09fb57cbad6e1429b773dee14f
+Merge: ad19fb0 b5cfe55
+Author: amaralc <32170099+amaralc@users.noreply.github.com>
+Date:   Thu Jan 16 19:57:35 2020 -0300
+
+    Merge pull request #7 from amaralc/feature/adding-business-submodule
+    
+    Business: Adding business submodule
+

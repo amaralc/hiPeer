@@ -1,0 +1,9 @@
+commit ad19fb030392c56adf0d616fa9001552a0b112c1
+Merge: d036094 3dd30d2
+Author: amaralc <32170099+amaralc@users.noreply.github.com>
+Date:   Thu Jan 16 19:50:29 2020 -0300
+
+    Merge pull request #6 from amaralc/feature/adding-api-client-submodule
+    
+    Backend: Adding api_client submodule
+

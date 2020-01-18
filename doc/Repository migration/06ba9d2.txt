@@ -1,0 +1,9 @@
+commit 06ba9d2f6879b2dd9f6bed5e249d4e9702ceab1c
+Author: Elias Luiz da Silva Júnior <eliasluizjr@gmail.com>
+Date:   Mon Jan 13 19:52:49 2020 -0300
+
+    Delete .gitkeep
+
+diff --git a/src/firmware/.gitkeep b/src/firmware/.gitkeep
+deleted file mode 100644
+index e69de29..0000000

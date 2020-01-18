@@ -1,0 +1,109 @@
+commit 4e5afab194e4875e23f4228496fa8c0756f750f8
+Author: amaralc <amaral.calil@gmail.com>
+Date:   Wed Jan 15 06:51:11 2020 -0300
+
+    Firmware - envia mensagem de erro caso usuario selecione numero invalido
+    
+    https://trello.com/c/VvOhGXax/57-embedded-envia-mensagem-de-erro-caso-usuario-selecione-numero-invalido#
+
+diff --git a/src/firmware/main/main.ino b/src/firmware/main/main.ino
+index 4049787..06b0364 100644
+--- a/src/firmware/main/main.ino
++++ b/src/firmware/main/main.ino
+@@ -15,6 +15,7 @@ const int ledButton = 53; // user validation pin (when pressed, change userStatu
+ int ledButtonState = LOW; // store initial state of 'ledButton' to LOW
+ int userState = 0;        // store user status (1 - valid, 0 - invalid)
+ String inputString = "";  // string to hold user input  
++int inputInteger = 0;     // integer to hold converted user input
+ 
+ // Container info
+ const int clusterSize = 12;
+@@ -84,36 +85,52 @@ void loop() {
+     }
+     
+     // if you get a newline, print the string, then the string's value:
+-    if (inputChar == '\n') {
++    if (inputChar == '\n') {      
+ 
+-      // if user is valid
+-      if(userState == 1){
++        // if user is valid
++        if(userState == 1){
+ 
+-        Serial.print("Selected container:");
+-        Serial.println(inputString.toInt());
++          // convert input to integer
++          inputInteger = inputString.toInt();
+   
+-        // define 'containerPin' according to user input
+-        containerPin = containerPins[inputString.toInt() - 1];
+-        Serial.print("Container pin number:");
+-        Serial.println(containerPin);
+-  
+-        if (userState == 1){
+-          containerState = 1;        
+-        }   
++          // if number is out of range
++          if ((inputInteger < 1) || (inputInteger > 12)){
++
++            // print selected number
++            Serial.print("Selected container:");
++            Serial.println(inputInteger);
+             
+-        // clear the string for new input:
+-        inputString = "";        
++            // print error message
++            Serial.println("Error: Number of container must be an integer between 1 and 12"); 
++            Serial.println("Type the number of the container you wish to open :"); 
++            inputString = ""; 
++  
++          // else, if number is within the range
++          } else {       
++  
++            Serial.print("Selected container:");
++            Serial.println(inputInteger);
++    
++            // define 'containerPin' according to user input
++            containerPin = containerPins[inputInteger - 1];
++            Serial.print("Container pin number:");
++            Serial.println(containerPin);
++  
++            // open container
++            containerState = 1; ////////////// VALIDATE USER AND CONTAINER HERE!
++            inputString = ""; 
++  
++          }       
+ 
+         // else, if user is not valid  
+-      } else {
++        } else {
+ 
+-      // message user to validate session
+-      Serial.println("Click the button before selecting the container");
+-
+-      // clear the string for new input:
+-      inputString = ""; 
++          // message user to validate session
++          Serial.println("Click the button before selecting the container");
+               
+-      };      
++        }; 
++        
++      };           
+       
+     }  
+ 
+@@ -121,7 +138,7 @@ void loop() {
+     if ((userState ==1)&&(containerState == 1)){
+ 
+       // activate container
+-      digitalWrite(containerPin, HIGH);  
++      digitalWrite(containerPin, HIGH);  //////////////////// OPEN CONTAINER HERE!
+       
+       // message user about countdown time
+       Serial.println("The selected container will be opened for 3 seconds. Hurry up!");
+@@ -139,4 +156,3 @@ void loop() {
+       Serial.println("Click button to validate new session");
+     }   
+   } 
+-}

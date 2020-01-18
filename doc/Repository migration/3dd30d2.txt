@@ -1,0 +1,25 @@
+commit 3dd30d210b9bf3942622b4a4fd2116274b61cef6
+Author: Elias Júnior <eliasluizjr@gmail.com>
+Date:   Thu Jan 16 19:13:53 2020 -0300
+
+    Backend: Adding api_client submodule
+
+diff --git a/.gitmodules b/.gitmodules
+new file mode 100644
+index 0000000..7d5dd04
+--- /dev/null
++++ b/.gitmodules
+@@ -0,0 +1,3 @@
++[submodule "src/api_client"]
++	path = src/api_client
++	url = https://github.com/amaralc/hiPeer-gostack
+diff --git a/src/api_client b/src/api_client
+new file mode 160000
+index 0000000..44cac57
+--- /dev/null
++++ b/src/api_client
+@@ -0,0 +1 @@
++Subproject commit 44cac574bf5598ef5ae4f96f59a1367c067c583d
+diff --git a/src/api_client/.gitkeep b/src/api_client/.gitkeep
+deleted file mode 100644
+index e69de29..0000000

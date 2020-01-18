@@ -1,0 +1,9 @@
+commit d036094e8901b3d60bddfe9d685e5db1ac6187fc
+Merge: bbcaef6 ea259ab
+Author: amaralc <32170099+amaralc@users.noreply.github.com>
+Date:   Thu Jan 16 14:26:40 2020 -0300
+
+    Merge pull request #5 from amaralc/feature/activate-containers-individually
+    
+    feature/activate-containers-individually
+

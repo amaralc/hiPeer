@@ -1,0 +1,37 @@
+commit 45e4c9f86746aa18e53ec8fce0a1a415c887fc7a
+Author: Elias Júnior <eliasluizjr@gmail.com>
+Date:   Mon Jan 13 19:39:28 2020 -0300
+
+    Infraestrutura - Corrigindo nomes de variáveis de ambiente Docker
+
+diff --git a/docker/docker-compose.yml b/docker/docker-compose.yml
+index 8f6bc44..d7278d2 100644
+--- a/docker/docker-compose.yml
++++ b/docker/docker-compose.yml
+@@ -2,7 +2,7 @@ version: "3.7"
+ 
+ services:
+   postgres:
+-    image: postgres:${POSTGRESVERSION:-alpine}
++    image: postgres:${POSTGRES_VERSION:-alpine}
+     restart: always
+     volumes: 
+       #- "postgresdata:/data/db/"
+@@ -17,7 +17,7 @@ services:
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
+ 
+   adminer:
+-    image: adminer:${ADMINERVERSION:-latest}
++    image: adminer:${ADMINER_VERSION:-latest}
+     restart: always
+     depends_on:
+       - postgres
+@@ -44,7 +44,7 @@ services:
+       MONGO_INITDB_DATABASE: hipeer
+ 
+   mongo-express:
+-    image: mongo-express:${MONGOEXPRESSVERSION:-latest}
++    image: mongo-express:${MONGOEXPRESS_VERSION:-latest}
+     restart: always
+     depends_on:
+       - mongo

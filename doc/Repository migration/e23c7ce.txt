@@ -1,0 +1,9 @@
+commit e23c7ce161d67082b88ac47f0cb9a8e130776b11
+Author: amaralc <amaral.calil@gmail.com>
+Date:   Mon Jan 13 00:17:04 2020 -0300
+
+    doc: estrutura de pastas
+
+diff --git a/src/firmware/.gitkeep b/src/firmware/.gitkeep
+new file mode 100644
+index 0000000..e69de29

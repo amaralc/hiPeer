@@ -1,0 +1,49 @@
+commit 3fd9e497e1fec6fac0cdce31b9508adc5086e034
+Author: Elias Júnior <eliasluizjr@gmail.com>
+Date:   Sat Jan 4 18:40:19 2020 -0300
+
+    Commit inicial
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..e69de29
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..b8ea14f
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,16 @@
++HiPeer
++
++Estrutura de pastas:
++/doc - Arquivos de documentação e planejamento
++
++* /sql - Scripts e informações pertinentes ao banco de dados
++
++* /src - Códigos-fonte
++
++	* /api_admin - Back-end do módulo administrativo
++
++	* /api_client - Back-end do módulo de operações/serviço
++
++	* /fe_app - Front-end do aplicativo móvel
++
++	* /fe_web - Front-end do site web
+diff --git a/doc/.gitkeep b/doc/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/sql/.gitkeep b/sql/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/api_admin/.gitkeep b/src/api_admin/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/api_client/.gitkeep b/src/api_client/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/fe_app/.gitkeep b/src/fe_app/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/fe_web/.gitkeep b/src/fe_web/.gitkeep
+new file mode 100644
+index 0000000..e69de29

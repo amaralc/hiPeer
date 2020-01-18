@@ -1,0 +1,120 @@
+commit ee37cb207d9b2a6216ef65381414c8f5630fc201
+Author: Elias Júnior <eliasluizjr@gmail.com>
+Date:   Sun Jan 12 20:35:11 2020 -0300
+
+    Infraestrutura - setup de bancos de dados no docker
+
+diff --git a/.gitignore b/.gitignore
+index e69de29..57eff06 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++.vscode/
++docker/volumes/
+\ No newline at end of file
+diff --git a/docker/.env b/docker/.env
+new file mode 100644
+index 0000000..b1a1b73
+--- /dev/null
++++ b/docker/.env
+@@ -0,0 +1,8 @@
++POSTGRES_VERSION=12.1-alpine
++ADMINER_VERSION=4.7.5-standalone
++MONGO_VERSION=4.2.2-bionic
++MONGOEXPRESS_VERSION=0.49.0
++
++POSTGRES_PASSWORD=postgres
++MONGO_USERNAME=mongo
++MONGO_PASSWORD=mongo
+\ No newline at end of file
+diff --git a/docker/docker-compose.yml b/docker/docker-compose.yml
+new file mode 100644
+index 0000000..8f6bc44
+--- /dev/null
++++ b/docker/docker-compose.yml
+@@ -0,0 +1,63 @@
++version: "3.7"
++
++services:
++  postgres:
++    image: postgres:${POSTGRESVERSION:-alpine}
++    restart: always
++    volumes: 
++      #- "postgresdata:/data/db/"
++      - type: bind
++        source: .\volumes\postgres\data\
++        target: "/data/db/"
++    ports:
++      - 5432:5432
++    # networks:
++    #   - backend
++    environment:
++      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
++
++  adminer:
++    image: adminer:${ADMINERVERSION:-latest}
++    restart: always
++    depends_on:
++      - postgres
++    ports:
++      - 8080:8080
++    # networks:
++    #   - backend
++
++  mongo:
++    image: mongo:${MONGO_VERSION:-bionic}
++    restart: always
++    volumes: 
++      #- "mongodata:/data/db/"
++      - type: bind
++        source: .\volumes\mongo\data\
++        target: "/data/db/"
++    # networks:
++    #   - backend
++    ports:
++      - 27017:27017
++    environment:
++      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:?err}
++      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?err}
++      MONGO_INITDB_DATABASE: hipeer
++
++  mongo-express:
++    image: mongo-express:${MONGOEXPRESSVERSION:-latest}
++    restart: always
++    depends_on:
++      - mongo
++    ports:
++      - 8081:8081
++    # networks:
++    #   - backend
++    environment:
++      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:?err}
++      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:?err}
++      ME_CONFIG_MONGODB_PORT: 27017
++      ME_CONFIG_MONGODB_SERVER: mongo
++      
++# volumes:
++#   postgresdata:
++#   mongodata:
+\ No newline at end of file
+diff --git a/sql/.gitkeep b/sql/.gitkeep
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/sql/create-database.sql b/sql/create-database.sql
+new file mode 100644
+index 0000000..1047b25
+--- /dev/null
++++ b/sql/create-database.sql
+@@ -0,0 +1,3 @@
++CREATE DATABASE IF NOT EXISTS HiPeer;
++ \connect HiPeer;
++CREATE SCHEMA Client;
+diff --git a/sql/create-users.sql b/sql/create-users.sql
+new file mode 100644
+index 0000000..d721297
+--- /dev/null
++++ b/sql/create-users.sql
+@@ -0,0 +1,2 @@
++CREATE USER 'hipeer_api_client' ENCRYPTED PASSWORD 'hipeer_api_client';
++GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA HiPeer TO hipeer_api_client;
+\ No newline at end of file
