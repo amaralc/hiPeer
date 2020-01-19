@@ -6,14 +6,38 @@
 
   Created 13 Jan 2020 by Calil Amaral
   Updated 15 Jan 2020 by Calil Amaral
+  Updated 18 Jan 2020 by Calil Amaral - Added keypad feature
 
 */
+
+// IMPORTS
+#include <Keypad.h>
+
+const byte ROWS = 4; // Four rows
+const byte COLS = 3; // Three columns
+
+// Define the Keymap
+char keys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
+};
+
+// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins.
+byte rowPins[ROWS] = { 45, 47, 49, 51};
+// Connect keypad COL0, COL1 and COL2 to these Arduino pins.
+byte colPins[COLS] = { 39, 41, 43 };
+
+// Create the Keypad
+Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
 
 // User info
 const int ledButton = 53; // user validation pin (when pressed, change userStatus to 1)
 int ledButtonState = LOW; // store initial state of 'ledButton' to LOW
 int userState = 0;        // store user status (1 - valid, 0 - invalid)
-String inputString = "";  // string to hold user input  
+String inputString = "";  // string to hold user input
 int inputInteger = 0;     // integer to hold converted user input
 
 // Container info
@@ -28,7 +52,7 @@ void setup() {
 
   // start serial communications at 9600 bits per second
   Serial.begin(9600);
-  
+
   // start digital pin 'ledButton' as input
   pinMode(ledButton, INPUT);
 
@@ -47,12 +71,12 @@ void setup() {
     delay(200);
     digitalWrite(LED_BUILTIN, LOW);
     digitalWrite(containerPins[i], LOW);
-    
+
   }
-  
+
   // message user to validate session
   Serial.println("Click the button to validate new session");
-  
+
 }
 
 // the loop function runs over and over again forever
@@ -67,84 +91,89 @@ void loop() {
     // switch userState to 1 (valid)
     userState = 1;
     Serial.print("User state: ");
-    Serial.println(userState); 
+    Serial.println(userState);
     Serial.println("Valid user");
     Serial.println();
-    Serial.println("Type the number of the container you wish to open :");    
-    delay(200);                    
-    
-  }  
+    Serial.println("Type the number of the container you wish to open :");
+    delay(200);
 
-  // Read serial input:
-  while (Serial.available() > 0) {
-    int inputChar = Serial.read();
-    if (isDigit(inputChar)) {
-      // convert the incoming byte to a char and add it to the string:
-      inputString += (char)inputChar;
-    }
-    
-    // if you get a newline, print the string, then the string's value:
-    if (inputChar == '\n') {      
+  }
 
-        // if user is valid
-        if(userState == 1){
+  // Read keypad
 
-          // convert input to integer
-          inputInteger = inputString.toInt();
-  
-          // if number is out of range
-          if ((inputInteger < 1) || (inputInteger > 12)){
+  int inputChar = kpd.getKey();
 
-            // print selected number
-            Serial.print("Selected container:");
-            Serial.println(inputInteger);
-            
-            // print error message
-            Serial.println("Error: Number of container must be an integer between 1 and 12"); 
-            Serial.println("Type the number of the container you wish to open :"); 
-            inputString = ""; 
-  
-          // else, if number is within the range
-          } else {       
-  
-            Serial.print("Selected container:");
-            Serial.println(inputInteger);
-    
-            // define 'containerPin' according to user input
-            containerPin = containerPins[inputInteger - 1];
-            Serial.print("Container pin number:");
-            Serial.println(containerPin);
-  
-            // open container
-            containerState = 1; ////////////// VALIDATE USER AND CONTAINER HERE!
-            inputString = ""; 
-  
-          }       
+  // check if input is number and add to string
+  if (isDigit(inputChar)) {
+    // convert the incoming byte to a char and add it to the string:
+    inputString += (char)inputChar;
+  }
 
-        // else, if user is not valid  
+  // if you get a '#', print the string, then the string's value:
+  if (inputChar == '#') {
+
+      // if user is valid
+      if(userState == 1){
+
+        // convert input to integer
+        inputInteger = inputString.toInt();
+
+        // if number is out of range
+        if ((inputInteger < 1) || (inputInteger > 12)){
+
+          // print selected number
+          Serial.print("Selected container:");
+          Serial.println(inputInteger);
+
+          // print error message
+          Serial.println("Error: Number of container must be an integer between 1 and 12");
+          Serial.println("Type the number of the container you wish to open :");
+          inputString = "";
+
+        // else, if number is within the range
         } else {
 
-          // message user to validate session
-          Serial.println("Click the button before selecting the container");
-              
-        }; 
-        
-      };           
-      
-    }  
+          Serial.print("Selected container:");
+          Serial.println(inputInteger);
+
+          // define 'containerPin' according to user input
+          containerPin = containerPins[inputInteger - 1];
+          Serial.print("Container pin number:");
+          Serial.println(containerPin);
+
+          // open container
+          containerState = 1; ////////////// VALIDATE USER AND CONTAINER HERE!
+
+          // reset input string
+          inputString = "";
+
+        }
+
+      // else, if user is not valid
+      } else {
+
+        // message user to validate session
+        Serial.println("Click the button before selecting the container");
+
+        // reset input string
+        inputString = "";
+
+      };
+
+    };
 
     // if user is valid and 'containerState' is active
     if ((userState ==1)&&(containerState == 1)){
 
       // activate container
       digitalWrite(containerPin, HIGH);  //////////////////// OPEN CONTAINER HERE!
-      
+
       // message user about countdown time
       Serial.println("The selected container will be opened for 3 seconds. Hurry up!");
       delay(3000);
 
       // deactivate container
-      digitalWrite(containerPin, LOW); 
+      digitalWrite(containerPin, LOW);
 
       // reset 'containerState' and 'userState'
       containerState = 0;
@@ -153,5 +182,5 @@ void loop() {
       // message user to validate session
       Serial.println();
       Serial.println("Click button to validate new session");
-    }   
-  } 
+    }
+  }
