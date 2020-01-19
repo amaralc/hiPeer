@@ -100,34 +100,49 @@ void setup() {
   }
 
   // message user to validate session
-  Serial.println("Click the button to validate new session");
+  Serial.println("Pass your card to validate new session");
 
 }
 
 // the loop function runs over and over again forever
 void loop() {
 
-  // Has a card been detected?
-  if (RC522.isCard())
-  {
-    // If so then get its serial number
-    RC522.readCardSerial();
-    Serial.println("Card detected:");
-    for(int i=0;i<5;i++)
-    {
-    Serial.print(RC522.serNum[i],DEC);
-    //Serial.print(RC522.serNum[i],HEX); //to print card detail in Hexa Decimal format
+  // Is user still active?
+
+  if (userState != 1){
+    // Has a card been detected?
+    if (RC522.isCard())
+    {    
+      // If so then get its serial number
+      RC522.readCardSerial();
+  
+      // Print card detected
+      Serial.println("Card detected:");
+  
+      // Print serial number
+      for(int i=0;i<5;i++)
+      {
+      Serial.print(RC522.serNum[i],DEC);
+      //Serial.print(RC522.serNum[i],HEX); //to print card detail in Hexa Decimal format
+      }
+      Serial.println();
+      Serial.println();
+
+      // Activate dummy button
+      ledButtonState = HIGH;
+      delay(100);
     }
-    Serial.println();
-    Serial.println();
   }
-  delay(200);
+  
 
   // read ledButton and store result in 'ledButtonState'
-  ledButtonState = digitalRead(ledButton);
+  // ledButtonState = digitalRead(ledButton);
 
   // if ledButton active
   if (ledButtonState == HIGH){
+
+    // deactivate dummy button
+    ledButtonState = LOW;
 
     // switch userState to 1 (valid)
     userState = 1;
@@ -137,7 +152,6 @@ void loop() {
     Serial.println();
     Serial.println("Type the number of the container you wish to open :");
     delay(200);
-
   }
 
   // Read keypad
@@ -194,7 +208,7 @@ void loop() {
       } else {
 
         // message user to validate session
-        Serial.println("Click the button before selecting the container");
+        Serial.println("Pass your card to validate session before selecting the container");
 
         // reset input string
         inputString = "";
@@ -222,6 +236,7 @@ void loop() {
 
       // message user to validate session
       Serial.println();
-      Serial.println("Click button to validate new session");
+      Serial.println();
+      Serial.println("Pass card to validate new session");
     }
   }
