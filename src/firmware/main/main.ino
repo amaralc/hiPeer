@@ -10,13 +10,16 @@
 
 */
 
-// IMPORTS
-#include <Keypad.h>
+// KEYPAD ---------------------------------------------------------------------
 
+// Libraries to use with keypad
+#include <Keypad.h> 
+
+// Define number of rows and columns (keypad)
 const byte ROWS = 4; // Four rows
 const byte COLS = 3; // Three columns
 
-// Define the Keymap
+// Define the Keymap (keypad)
 char keys[ROWS][COLS] = {
   {'1','2','3'},
   {'4','5','6'},
@@ -25,16 +28,30 @@ char keys[ROWS][COLS] = {
 };
 
 // Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins.
-byte rowPins[ROWS] = { 45, 47, 49, 51};
+byte rowPins[ROWS] = { 37, 39, 41, 43};
 // Connect keypad COL0, COL1 and COL2 to these Arduino pins.
-byte colPins[COLS] = { 39, 41, 43 };
+byte colPins[COLS] = { 31, 33, 35 };
 
 // Create the Keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+// RFID RC522 ------------------------------------------------------------------
+
+// Libraries
+#include <SPI.h>
+#include <RFID.h>
+
+// Define the DIO used for the SDA (SS) and RST (reset) pins
+#define SDA_DIO 9
+#define RESET_DIO 8
+
+// Create an instance of the RFID library
+RFID RC522(SDA_DIO, RESET_DIO); 
+
+// LEDs and button -------------------------------------------------------------
 
 // User info
-const int ledButton = 53; // user validation pin (when pressed, change userStatus to 1)
+const int ledButton = 46; // user validation pin (when pressed, change userStatus to 1)
 int ledButtonState = LOW; // store initial state of 'ledButton' to LOW
 int userState = 0;        // store user status (1 - valid, 0 - invalid)
 String inputString = "";  // string to hold user input
@@ -42,16 +59,24 @@ int inputInteger = 0;     // integer to hold converted user input
 
 // Container info
 const int clusterSize = 12;
-int containerPins[clusterSize] = {28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50}; // define array with container pins
+int containerPins[clusterSize] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44}; // define array with container pins
 int containerSignalPin = 28;                                              // define pino que envia sinal para LEDs (default = 28);
 int containerState = 0;                                                   // define estado do container;
 int containerPin;                                                         // define variable to hold container pin number
+
+// SETUP -----------------------------------------------------------------------
 
 // the setup function runs once when you press reset or power the board
 void setup() {
 
   // start serial communications at 9600 bits per second
   Serial.begin(9600);
+
+  // Enable the SPI interface (use with RFID)
+  SPI.begin(); 
+
+  // Initialise the RFID reader (use with RFID)
+  RC522.init();
 
   // start digital pin 'ledButton' as input
   pinMode(ledButton, INPUT);
@@ -81,6 +106,22 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
+
+  // Has a card been detected?
+  if (RC522.isCard())
+  {
+    // If so then get its serial number
+    RC522.readCardSerial();
+    Serial.println("Card detected:");
+    for(int i=0;i<5;i++)
+    {
+    Serial.print(RC522.serNum[i],DEC);
+    //Serial.print(RC522.serNum[i],HEX); //to print card detail in Hexa Decimal format
+    }
+    Serial.println();
+    Serial.println();
+  }
+  delay(200);
 
   // read ledButton and store result in 'ledButtonState'
   ledButtonState = digitalRead(ledButton);
