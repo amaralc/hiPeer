@@ -64,6 +64,7 @@
 
   * Adiciona codigo para ler entradas do keypad
     * Ref: https://playground.arduino.cc/Main/KeypadTutorial/
-
+  * Cria esquema de ligacao simplificado usando Fritzing Software;
+  * Salva imagem do esquema de ligacao com nome 'schematics' na pasta 'firmware/doc';
 
 
