@@ -522,6 +522,67 @@
 
       ```
 
+## Migration de usuario
+
+  Objetivo: criacao da primeira migration (migration de usuario) utilizando sequelize-cli.
+
+  * Cria migration 'create-users' usando sequelize-cli: `yarn sequelize migration:create --name=create-users` ;
+  * Atualiza arquivo de migration criado:
+
+  ```js
+  module.exports = {
+    up: (queryInterface, Sequelize) => {
+      return queryInterface.createTable('users', {
+        id: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        name: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        email: {
+          type: Sequelize.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        password_hash: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        provider: {
+          type: Sequelize.BOOLEAN,
+          default: false,
+          allowNull: false,
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        updated_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+      });
+    },
+
+    down: queryInterface => {
+      return queryInterface.dropTable('users');
+    },
+  };
+
+  ```
+
+  * Roda primeira migration: `yarn sequelize db:migrate` ;
+  * Utilizando o PostBird confira se tabela de usuarios foi criada no banco de dados;
+  * Para desfazer a migration antes de ter enviado a outros desenvolvedores:
+    * Desfazer a ultima migration: `yarn sequelize db:migrate:undo` ;
+    * Desfazer todas as migrations: `yarn sequelize db:migration:undo:all` ;
+
+
+
 
 
 
