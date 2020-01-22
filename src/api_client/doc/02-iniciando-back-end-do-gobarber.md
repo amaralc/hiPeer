@@ -581,7 +581,53 @@
     * Desfazer a ultima migration: `yarn sequelize db:migrate:undo` ;
     * Desfazer todas as migrations: `yarn sequelize db:migration:undo:all` ;
 
+## 08 Model de usuario
 
+  Objetivo: criar model de usuarios que sera utilizado para criar, deletar e alterar dados de usuarios.
+
+  * Cria arquivo **src/app/models/User.js** e insere conteúdo:
+
+    ```javascript
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import Sequelize, { Model } from 'sequelize';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    /*
+    ** Cria classe User extendendo os metodos da classe Model, da dependencia
+    ** 'sequelize'
+    */
+    class User extends Model {
+      /*
+      ** Metodo estatico que sera chamado automaticamente pelo sequelize
+      */
+      static init(sequelize) {
+        /*
+        ** Chama metodo init da classe superior (Model) enviando colunas da base de dados
+        ** Envia somente o que o usuario vai fornecer como input (chave primaria, etc, nao sao necessarias)
+        */
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password_hash: Sequelize.STRING,
+            provider: Sequelize.BOOLEAN,
+          },
+          {
+            /*
+             ** Argumento que sera enviado pelo loader de models
+             */
+            sequelize,
+          }
+        );
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default User();
+
+    ```
+
+    * Se quiser visualizar outras opcoes de dados que podem ser passados no metodo init digite: Ctrl + space
 
 
 
