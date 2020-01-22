@@ -1,4 +1,4 @@
-// IMPORTS ---------------------------------------------------------------------
+/* --------------------------------- IMPORTS ---------------------------------*/
 import express from 'express';
 import routes from './routes';
 /*
@@ -8,26 +8,26 @@ import routes from './routes';
  */
 import './database';
 
-// CONTENT ---------------------------------------------------------------------
+/* --------------------------------- CONTENT ---------------------------------*/
 class App {
-  // chamado automaticamente quando classe for instanciada
+  /* Chamado automaticamente quando classe for instanciada */
   constructor() {
     this.server = express();
     this.middlewares();
     this.routes();
   }
 
-  // cadastro dos middlewares da aplicacao
+  /* Cadastro dos middlewares da aplicacao */
   middlewares() {
-    // prepara app para receber requisicoes em formato json
+    /* Prepara app para receber requisicoes em formato json */
     this.server.use(express.json());
   }
 
   routes() {
-    // importa rotas de outro arquivo e usa no servidor
+    /* Importa rotas de outro arquivo e usa no servidor */
     this.server.use(routes);
   }
 }
 
-// EXPORTS ---------------------------------------------------------------------
+/* --------------------------------- EXPORTS ---------------------------------*/
 export default new App().server;
