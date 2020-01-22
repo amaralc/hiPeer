@@ -1,6 +1,12 @@
 // IMPORTS ---------------------------------------------------------------------
 import express from 'express';
 import routes from './routes';
+/*
+ ** Importa arquivo que faz conexao com banco de dados. Nao é necessario passar
+ ** o caminho completo com '.../index.js', pois ele ja assimila automaticamente
+ ** esse nome.
+ */
+import './database';
 
 // CONTENT ---------------------------------------------------------------------
 class App {
