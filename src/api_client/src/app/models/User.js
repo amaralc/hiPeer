@@ -12,8 +12,9 @@ class User extends Model {
    */
   static init(sequelize) {
     /*
-     ** Chama metodo init da classe superior (Model) enviando colunas da base de dados
-     ** Envia somente o que o usuario vai fornecer como input (chave primaria, etc, nao sao necessarias)
+     ** Chama metodo init da classe superior (Model) enviando colunas da base
+     ** de dados e envia somente o que o usuario vai fornecer como input.
+     ** (chave primaria, etc, nao sao necessarias)
      */
     super.init(
       {
@@ -33,4 +34,4 @@ class User extends Model {
 }
 
 /* --------------------------------- EXPORTS ---------------------------------*/
-export default User();
+export default User;

@@ -1,3 +1,4 @@
+/* --------------------------------- EXPORTS ---------------------------------*/
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('users', {
@@ -22,7 +23,7 @@ module.exports = {
       },
       provider: {
         type: Sequelize.BOOLEAN,
-        default: false,
+        defaultValue: false,
         allowNull: false,
       },
       created_at: {
