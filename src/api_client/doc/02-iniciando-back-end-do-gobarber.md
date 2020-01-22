@@ -522,10 +522,196 @@
 
       ```
 
+## Migration de usuario
 
+  Objetivo: criacao da primeira migration (migration de usuario) utilizando sequelize-cli.
 
+  * Cria migration 'create-users' usando sequelize-cli: `yarn sequelize migration:create --name=create-users` ;
+  * Atualiza arquivo de migration criado:
 
+  ```js
+  module.exports = {
+    up: (queryInterface, Sequelize) => {
+      return queryInterface.createTable('users', {
+        id: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        name: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        email: {
+          type: Sequelize.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        password_hash: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        provider: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+          allowNull: false,
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        updated_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+      });
+    },
 
+    down: queryInterface => {
+      return queryInterface.dropTable('users');
+    },
+  };
+
+  ```
+
+  * Roda primeira migration: `yarn sequelize db:migrate` ;
+  * Utilizando o PostBird confira se tabela de usuarios foi criada no banco de dados;
+  * Para desfazer a migration antes de ter enviado a outros desenvolvedores:
+    * Desfazer a ultima migration: `yarn sequelize db:migrate:undo` ;
+    * Desfazer todas as migrations: `yarn sequelize db:migration:undo:all` ;
+
+## 08 Model de usuario
+
+  Objetivo: criar model de usuarios que sera utilizado para criar, deletar e alterar dados de usuarios.
+
+  * Cria arquivo **src/app/models/User.js** e insere conteúdo:
+
+    ```javascript
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import Sequelize, { Model } from 'sequelize';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    /*
+    ** Cria classe User extendendo os metodos da classe Model, da dependencia
+    ** 'sequelize'
+    */
+    class User extends Model {
+      /*
+      ** Metodo estatico que sera chamado automaticamente pelo sequelize
+      */
+      static init(sequelize) {
+        /*
+        ** Chama metodo init da classe superior (Model) enviando colunas da base de dados
+        ** Envia somente o que o usuario vai fornecer como input (chave primaria, etc, nao sao necessarias)
+        */
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password_hash: Sequelize.STRING,
+            provider: Sequelize.BOOLEAN,
+          },
+          {
+            /*
+             ** Argumento que sera enviado pelo loader de models
+             */
+            sequelize,
+          }
+        );
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default User;
+
+    ```
+
+    * Se quiser visualizar outras opcoes de dados que podem ser passados no metodo init digite: Ctrl + space
+
+## 09 Criando loader de models
+
+  Objetivo: criar arquivo que faz conexao com banco de dados definido em **src/config/database.js** e carrega todos os models da aplicacao para toda a aplicacao conheca os models.
+
+  * Cria arquivo **src/database/index.js** que realiza a conexao com banco de dados e carrega models:
+
+  ```js
+  /* --------------------------------- IMPORTS ---------------------------------*/
+  import Sequelize from 'sequelize';
+  import databaseConfig from '../config/database';
+  import User from '../app/models/User';
+
+  /* --------------------------------- CONTENT ---------------------------------*/
+
+  /* Cria array com todos os models da aplicacao */
+  const models = [User];
+
+  /*
+  ** Cria classe Database
+  */
+  class Database {
+    constructor() {
+      this.init();
+    }
+
+    /*
+    ** metodo que faz conexao com base de dados e carrega os models da aplicacao
+    */
+    init() {
+      /*
+      ** Variavel esperada dentro dos models no metodo init
+      */
+      this.connection = new Sequelize(databaseConfig);
+
+      /* Acessa o metodo init de cada model da aplicacao passando a conexao */
+      models.map(model => model.init(this.connection));
+    }
+  }
+
+  /* --------------------------------- EXPORTS ---------------------------------*/
+  export default new Database();
+
+  ```
+
+  * Importa arquivo **database/index.js** em **src/app.js**:
+
+  ```js
+  /*
+    ** Importa arquivo que faz conexao com banco de dados. Nao é necessario passar
+    ** o caminho completo com '.../index.js', pois ele ja assimila automaticamente
+    ** esse nome.
+    */
+  import './database';
+  ```
+
+  * Altera **routes.js** para testar cadastro de usuario respondendo res.json(user):
+
+    ```js
+    // IMPORTS  --------------------------------------------------------------------
+    import { Router } from 'express';
+    import User from './app/models/User';
+
+    // CONTENT ---------------------------------------------------------------------
+    const routes = new Router();
+
+    // define rota raiz
+    routes.get('/', async (req, res) => {
+      /*
+      ** Cria usuario teste na rota raiz para avaliar se loader de models esta funcionando
+      */
+      const user = await User.create({
+        name: 'usuario numero um',
+        email: 'user1@email.com',
+        password_hash: '123456',
+      });
+
+      /* Altera res.json() para retornar objeto com usuario criado */
+      return res.json(user);
+    });
+
+    // EXPORTS  ---------------------------------------------------------------------
+    export default routes;
+    ```
 
 
 
