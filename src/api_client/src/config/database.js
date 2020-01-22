@@ -6,7 +6,7 @@ module.exports = {
   host: 'localhost', // informa o host onde se encontra a base de dados
   username: 'postgres', // informa username para acesso
   password: 'docker', // password para acesso
-  database: 'gostack-gobarber', // nome do banco de dados criado
+  database: 'hipeer', // nome do banco de dados criado
 
   // define funcinalidades extra
   define: {
