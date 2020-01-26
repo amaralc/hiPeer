@@ -13,7 +13,7 @@ class UserController {
 
     /** Se usuario ja existir, retorna erro */
     if (userExists) {
-      return res.json({ error: 'User already exists!' });
+      return res.status(400).json({ error: 'User already exists!' });
     }
 
     /**
@@ -33,11 +33,52 @@ class UserController {
 
   /** Metodo de alteracao dos dados do usuario */
   async update(req, res) {
-    /** Pega id do usuario inserido na requisicao atravez do middleware de autenticacao */
-    console.log(req.userId);
+    /** Busca email e oldPassword de dentro do req.body */
+    const { email, oldPassword, password } = req.body;
 
-    /** Retorna json */
-    return res.json({ ok: true });
+    /** Get current user information */
+    const user = await User.findByPk(req.userId);
+
+    /** If user is changing the email adress */
+    if (email !== user.email) {
+      /** Verify if new email already exists in the database */
+      const userExists = await User.findOne({
+        where: { email },
+      });
+
+      /** If email is already taken return error */
+      if (userExists) {
+        return res.status(400).json({ error: 'User already exists!' });
+      }
+    }
+
+    /** If user has informed new password without informing old password */
+    if (password && !oldPassword) {
+      /** ...return arror 401 and request user to inform old password */
+      res.status(401).json({ error: 'Inform old password' });
+    }
+
+    /**
+     * If user has informed old password and (&&) it does not match with its old
+     * password...
+     */
+    if (oldPassword && !(await user.checkPassword(oldPassword))) {
+      /**
+       *  ...return error 401
+       */
+      res.status(401).json({ error: 'Password does not match' });
+    }
+
+    /** If all requirements were met then updates user informaiton */
+    const { id, name, provider } = await user.update(req.body);
+
+    /** Retorna json apenas com dados uteis ao frontend */
+    return res.json({
+      id,
+      name,
+      email,
+      provider,
+    });
   }
 }
 
