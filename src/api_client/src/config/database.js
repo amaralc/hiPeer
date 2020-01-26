@@ -1,12 +1,11 @@
-// EXPORTS
-// exporta objeto
+/* --------------------------------- EXPORTS ---------------------------------*/
 module.exports = {
-  // define dados para conexao com banco de dados
+  /* Define dados para conexao com banco de dados */
   dialect: 'postgres', // informa qual sera o dialeto utilizado
   host: 'localhost', // informa o host onde se encontra a base de dados
   username: 'postgres', // informa username para acesso
   password: 'docker', // password para acesso
-  database: 'gostack-gobarber', // nome do banco de dados criado
+  database: 'hipeer', // nome do banco de dados criado
 
   // define funcinalidades extra
   define: {
