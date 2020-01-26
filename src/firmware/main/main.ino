@@ -7,8 +7,26 @@
   Created 13 Jan 2020 by Calil Amaral
   Updated 15 Jan 2020 by Calil Amaral
   Updated 18 Jan 2020 by Calil Amaral - Added keypad feature
+  Updated 20 Jan 2020 by Calil Amaral - Added RFID reader
+  Updated 26 Jan 2020 by Calil Amaral - Added OLED display
 
 */
+
+// LEDs and button -------------------------------------------------------------
+
+// User info
+const int ledButton = 46; // user validation pin (when pressed, change userStatus to 1)
+int ledButtonState = LOW; // store initial state of 'ledButton' to LOW
+int userState = 0;        // store user status (1 - valid, 0 - invalid)
+String inputString = "";  // string to hold user input
+int inputInteger = 0;     // integer to hold converted user input
+
+// Container info
+const int clusterSize = 12;
+int containerPins[clusterSize] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44}; // define array with container pins
+int containerSignalPin = 28;                                              // define pino que envia sinal para LEDs (default = 28);
+int containerState = 0;                                                   // define estado do container;
+int containerPin;                                                         // define variable to hold container pin number
 
 // KEYPAD ---------------------------------------------------------------------
 
@@ -48,21 +66,15 @@ Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 // Create an instance of the RFID library
 RFID RC522(SDA_DIO, RESET_DIO); 
 
-// LEDs and button -------------------------------------------------------------
+// OLED Display ----------------------------------------------------------------
 
-// User info
-const int ledButton = 46; // user validation pin (when pressed, change userStatus to 1)
-int ledButtonState = LOW; // store initial state of 'ledButton' to LOW
-int userState = 0;        // store user status (1 - valid, 0 - invalid)
-String inputString = "";  // string to hold user input
-int inputInteger = 0;     // integer to hold converted user input
+// Libraries
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-// Container info
-const int clusterSize = 12;
-int containerPins[clusterSize] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44}; // define array with container pins
-int containerSignalPin = 28;                                              // define pino que envia sinal para LEDs (default = 28);
-int containerState = 0;                                                   // define estado do container;
-int containerPin;                                                         // define variable to hold container pin number
+// Definitions
+#define OLED_RESET 4
+Adafruit_SSD1306 display( OLED_RESET);
 
 // SETUP -----------------------------------------------------------------------
 
@@ -72,11 +84,20 @@ void setup() {
   // start serial communications at 9600 bits per second
   Serial.begin(9600);
 
+  // OLED display --------------------------------------------------------------
+
+  // Begin display communication 
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  
+  // RFID ----------------------------------------------------------------------
+
   // Enable the SPI interface (use with RFID)
   SPI.begin(); 
 
   // Initialise the RFID reader (use with RFID)
   RC522.init();
+
+  // LEDs and button -----------------------------------------------------------
 
   // start digital pin 'ledButton' as input
   pinMode(ledButton, INPUT);
@@ -100,15 +121,24 @@ void setup() {
   }
 
   // message user to validate session
-  Serial.println("Pass your card to validate new session");
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.print("Pass your card to validate new session");
+  display.display();
+  // Serial.println("Pass your card to validate new session");
 
 }
 
 // the loop function runs over and over again forever
 void loop() {
 
-  // Is user still active?
+  // OLED Display -------------------------------------------
 
+  
+
+  // Is user still active?
   if (userState != 1){
     // Has a card been detected?
     if (RC522.isCard())
@@ -116,8 +146,15 @@ void loop() {
       // If so then get its serial number
       RC522.readCardSerial();
   
-      // Print card detected
-      Serial.println("Card detected:");
+      // Print card detected      
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Card detected!");      
+      display.display();
+      delay(1000);
+      //Serial.println("Card detected:");
   
       // Print serial number
       for(int i=0;i<5;i++)
@@ -150,7 +187,15 @@ void loop() {
     Serial.println(userState);
     Serial.println("Valid user");
     Serial.println();
-    Serial.println("Type the number of the container you wish to open :");
+
+    // Ask for the number of the container
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.setCursor(0,0);
+    display.print("Type the number of the container you wish to open and press # to open it: ");
+    display.display();
+    // Serial.println("Type the number of the container you wish to open :");
     delay(200);
   }
 
@@ -162,10 +207,28 @@ void loop() {
   if (isDigit(inputChar)) {
     // convert the incoming byte to a char and add it to the string:
     inputString += (char)inputChar;
+
+    // Print number entered
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.setCursor(0,0);
+    display.print("Type the number of the container you wish to open and press # to open it: "+ inputString);
+    display.display();
+    
   }
 
   // if you get a '#', print the string, then the string's value:
   if (inputChar == '#') {
+
+      // print selected number
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Selected container: "+ inputString);
+      display.display();
+      delay(1000);
 
       // if user is valid
       if(userState == 1){
@@ -176,20 +239,31 @@ void loop() {
         // if number is out of range
         if ((inputInteger < 1) || (inputInteger > 12)){
 
-          // print selected number
-          Serial.print("Selected container:");
-          Serial.println(inputInteger);
+          // clean inputString
+          inputString = "";
 
           // print error message
-          Serial.println("Error: Number of container must be an integer between 1 and 12");
-          Serial.println("Type the number of the container you wish to open :");
-          inputString = "";
+          display.clearDisplay();
+          display.setTextColor(WHITE);
+          display.setTextSize(1);
+          display.setCursor(0,0);
+          display.print("Error: Number of container must be an integer between 1 and 12");
+          display.display();
+          delay(2500);          
+          //Serial.println("Error: Number of container must be an integer between 1 and 12");
+
+          // ask for new entry
+          display.clearDisplay();
+          display.setTextColor(WHITE);
+          display.setTextSize(1);
+          display.setCursor(0,0);
+          display.print("Type the number of the container you wish to open and press # to open it: "+ inputString);
+          display.display();
+          //Serial.println("Type the number of the container you wish to open :");
+          
 
         // else, if number is within the range
         } else {
-
-          Serial.print("Selected container:");
-          Serial.println(inputInteger);
 
           // define 'containerPin' according to user input
           containerPin = containerPins[inputInteger - 1];
@@ -208,7 +282,14 @@ void loop() {
       } else {
 
         // message user to validate session
-        Serial.println("Pass your card to validate session before selecting the container");
+        display.clearDisplay();
+        display.setTextColor(WHITE);
+        display.setTextSize(1);
+        display.setCursor(0,0);
+        display.print("Pass your card to validate session before selecting the container");
+        display.display();
+        delay(1000);
+        //Serial.println("Pass your card to validate session before selecting the container");
 
         // reset input string
         inputString = "";
@@ -218,13 +299,28 @@ void loop() {
     };
 
     // if user is valid and 'containerState' is active
-    if ((userState ==1)&&(containerState == 1)){
+    if ((userState ==1)&&(containerState == 1)){      
+
+      // message user about countdown time
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("The selected container will be opened for 3 seconds. Hurry up!");
+      display.display();
+      delay(2500);
+
+      // inform user that container is being opened
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Opening container...");
+      display.display();
+      delay(200);
 
       // activate container
       digitalWrite(containerPin, HIGH);  //////////////////// OPEN CONTAINER HERE!
-
-      // message user about countdown time
-      Serial.println("The selected container will be opened for 3 seconds. Hurry up!");
       delay(3000);
 
       // deactivate container
@@ -235,8 +331,14 @@ void loop() {
       userState = 0;
 
       // message user to validate session
-      Serial.println();
-      Serial.println();
-      Serial.println("Pass card to validate new session");
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Pass your card to validate new session");
+      display.display();
+      //Serial.println();
+      //Serial.println();
+      //Serial.println("Pass card to validate new session");
     }
   }
