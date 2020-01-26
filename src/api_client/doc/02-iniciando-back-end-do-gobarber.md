@@ -1,6 +1,27 @@
 # Iniciando back end do gobarber
 
+## Indice
+
+  * [00 Configurando estrutura](#00-configurando-a-estrutura)
+  * [01 Nodemon & Sucrase](#01-nodemon--sucrase)
+  * [02 Conceitos do Docker](#02-conceitos-do-docker)
+  * [03 Configurando o Docker](#03-configurando-o-docker)
+  * [04 Sequelize & MVC](#04-sequelize-&-MVC)
+  * [05 ESLint, Prettier & EditorConfig](#05-eslint-prettier--EditorConfig)
+  * [06 Configurando Sequelize](#06-configurando-sequelize)
+  * [07 Migration de usuario](#07-migration-de-usuario)
+  * [08 Model de usuario](#08-model-de-usuario)
+  * [09 Criando loader de models](#09-criando-loader-de-models)
+  * [10 Cadastro de usuarios](#10-cadastro-de-usuarios)
+  * [11 Gerando hash da senha](#11-gerando-hash-da-senha)
+  * [12 Conceitos de JWT](#12-conceitos-de-jwt)
+  * [13 Autenticacao JWT](#13-autenticacao-jwt)
+  * [14 Middleware de autenticacao](#14-middleware-de-autenticacao)
+  * [15 Update do usuario](#15-update-do-usuario)
+  * [16 Validando dados de entrada](#16-validando-dados-de-entrada)
+
 ## 00 Configurando estrutura
+[Voltar para índice](#indice)
 
   Objetivo: estruturar pastas e arquivos basicos da aplicacao.
 
@@ -20,6 +41,7 @@
   * (terminal) testa projeto: `node src/server.js` ;
 
 ## 01 Nodemon & Sucrase
+[Voltar para índice](#indice)
 
   Objetivo: utilizar sintaxe de 'import' e 'export'com *sucrase*, automatizar acionamento do servidor com *nodemon* e adapta debugger para rodar com sucrase;
 
@@ -84,6 +106,7 @@
   * ATENCAO: mantenha pasta *.vscode* para manter configuracoes do debugger com *sucrase*
 
 ## 02 Conceitos do Docker
+[Voltar para índice](#indice)
 
   * Como funciona?
 
@@ -128,6 +151,7 @@
         ```
 
 ## 03 Configurando o Docker
+[Voltar para índice](#indice)
 
   * Instala Docker CE
 
@@ -179,6 +203,7 @@
   * (terminal) Visualiza log de erros do container: `docker logs database`
 
 ## 04 Sequelize & MVC
+[Voltar para índice](#indice)
 
   * O que é Sequelize?
 
@@ -331,6 +356,7 @@
       ```
 
 ## 05 ESLint, Prettier & EditorConfig
+[Voltar para índice](#indice)
 
   Objetivo: configurar ferramentas que irão ajudar a padronizar o código (manter padrão de escrita de código entre todos os desenvolvedores);
 
@@ -387,7 +413,7 @@
     rules: {
 
           // torna desecessario usar 'this' nos metodos da classe
-      "class-method-use-this": "off",
+      "class-methods-use-this": "off",
 
       // permite receber parametro e fazer alteracoes nesse parametro (usado pelo sequelize)
       "no-param-reassign":"off",
@@ -437,6 +463,7 @@
     ```
 
 ## 06 Configurando Sequelize
+[Voltar para índice](#indice)
 
   Objetivo: configurar sequelize e o inicio da estrutura de pastas da aplicação
 
@@ -522,7 +549,8 @@
 
       ```
 
-## Migration de usuario
+## 07 Migration de usuario
+[Voltar para índice](#indice)
 
   Objetivo: criacao da primeira migration (migration de usuario) utilizando sequelize-cli.
 
@@ -582,6 +610,7 @@
     * Desfazer todas as migrations: `yarn sequelize db:migration:undo:all` ;
 
 ## 08 Model de usuario
+[Voltar para índice](#indice)
 
   Objetivo: criar model de usuarios que sera utilizado para criar, deletar e alterar dados de usuarios.
 
@@ -630,6 +659,7 @@
     * Se quiser visualizar outras opcoes de dados que podem ser passados no metodo init digite: Ctrl + space
 
 ## 09 Criando loader de models
+[Voltar para índice](#indice)
 
   Objetivo: criar arquivo que faz conexao com banco de dados definido em **src/config/database.js** e carrega todos os models da aplicacao para toda a aplicacao conheca os models.
 
@@ -713,6 +743,909 @@
     export default routes;
     ```
 
+## 10 Cadastro de usuarios
+[Voltar para índice](#indice)
 
+  Objetivo: criar feature de registro de usuarios na api.
 
+  * Cria arquivo **controllers/UserController.js**:
 
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+
+    ```
+
+  * Modifica arquivo **routes.js**:
+    * Importa UserController;
+    * Deleta rota '/' get teste;
+    * Cria rota '/users' tipo post chamando metodo UserController.store;
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import { Router } from 'express';
+    import UserController from './app/controllers/UserController';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    const routes = new Router();
+
+    /** Define rota post para criar novo usuario */
+    routes.post('/users', UserController.store);
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default routes;
+    ```
+
+  * (insomnia) Cria variavel 'base_url' em 'no environments' > 'manage enviroments' > 'base environment":
+
+    ```js
+    {
+      "base_url":"http://localhost:3333"
+    }
+    ```
+  * (insomnia) Cria novo workspace com nome da aplicacao (ex.: gostack-gobarber);
+  * (insomnia) Cria pasta 'Users';
+  * (insomnia) Cria requisicao 'Create'
+    * Tipo: 'POST';
+    * Formato: 'JSON';
+    * Rota: base_url/users;
+    * Corpo:
+
+      ```js
+      {
+        "name": "name one",
+        "email": "email1@email.com",
+        "password_hash":"123456"
+      }
+      ```
+  * (terminal) Roda servidor: `yarn dev` ;
+  * (insomnia) Envia requisicao clicando em 'send';
+  * (insomnia) Verifica se resposta da requisicao esta de acordo com o codigo;
+    * Em caso de erro do tipo 'SequelizeUniqueConstraintError: Validation error',
+      verifique se o codigo esta verificando e bloqueando fluxo da requisicao caso
+      email ja esteja cadastrado;
+
+## 11 Gerando hash da senha
+[Voltar para índice](#indice)
+
+  Objetivo: gerar o hash da senha do usuario para armazenar no banco de dados.
+  Story: usuario envia senha sem hash, hash da senha é gerado e armazenado.
+
+  * (terminal) instala dependencia bcryptjs: `yarn add bcryptjs` ;
+  * Edita model de usuario (**User.js**):
+    * Importa bcrypt :
+
+      ```js
+      import bcrypt from 'bcryptjs';
+      ```
+
+    * Cria novo atributo 'password' dentro do model:
+
+      ```js
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        passowrd: Sequelize.VIRTUAL, // Campo sem correspondencia no database
+        password_hash: Sequelize.STRING,
+        provider: Sequelize.BOOLEAN,
+      },
+      ```
+
+    * Adiciona hook apos `super.init()`:
+
+      ```js
+      /**
+       * Hooks: Funcionalidade do sequelize -> trecho de codigo executados de
+      * forma automatica baseado em acoes que acontecem no nosso model.
+      *
+      * Hook 'before save': executa trecho de codigo antes de objeto ser salvo
+      * no banco de dados (criado ou editado).
+      */
+      this.addHook('beforeSave', async user => {
+        /** Se houver password na requisicao */
+        if (user.password) {
+          /**
+           * Aguarda e define password_hash como 8 rouds de criptografia da string
+          * enviada.
+          */
+          user.password_hash = await bcrypt.hash(user.password, 8);
+        }
+      });
+
+      /** Retorna model que acaba de ser inicializado */
+      return this;
+      ```
+
+  * (insomnia) edita corpo da requisicao para enviar password ao inves de password_hash:
+
+    ```js
+    {
+      "name": "user x",
+      "email": "emailx@email.com",
+      "password": "123456"
+    }
+    ```
+
+  * (insomnia) envia requisicao e verifica se usuario foi criado no banco de dados;
+  * (postbird) atualiza conexao e verifica se hash da senha do usuario foi armazenada;
+
+## 12 Conceitos de JWT
+[Voltar para índice](#indice)
+
+  Objetivo: entender os conceitos de autenticação JWT.
+
+  * JWT: JSON Web Token;
+  * O que é: um método de fazer autenticação em API REST [Representational state transfer](https://en.wikipedia.org/wiki/Representational_state_transfer);
+
+  ![](img/02-12-conceitos-de-jwt.PNG)
+
+  * Exemplo:
+    * Usuario envia 'email' e 'password' para rota '/sessions' conforme figura acima;
+    * Rota faz verificacoes de que precisa, vai ao banco de dados e verifica se informacoes
+      estao corretas;
+    * Se informacoes estiverem corretas, rota geram token JWT;
+    * Token é gerado a partir de biblioteca;
+    * Token tem formato conforme imagem acima, com tres hashs separadas por '.';
+      * Headers: guardam tipo de token gerado e algoritmo utilizado para gerar;
+        * Quando frontend precisar obter informacoes de dentro do token, ele vai precisar
+          saber qual tipo de criptografia foi utilizada.
+      * Payload: contem informacoes nao sensiveis, para caso seja necessario utiliza-las
+        em algum lugar;
+      * Assinatura: garante que token nao foi modificado externamente por outro usuario;
+
+## 13 Autenticacao JWT
+[Voltar para índice](#indice)
+
+  Objetivo: fazer parte de autenticacao do usuario.
+
+  * (terminal) instala dependencia jsonwebtoken: `yarn add jsonwebtoken` ;
+
+  * Cria session controller no arquivo **controllers/SessionController.js**:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    import authConfig from '../../config/auth';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class SessionController {
+      async store(req, res) {
+        /** Salva email e senha recebidos no corpo da requisicao */
+        const { email, password } = req.body;
+
+        /** Encontra usuario que tem campo email = variavel email (short sintax) */
+        const user = await User.findOne({ where: { email } });
+
+        /** Se usuario nao existe retorna erro 401 (nao autorizado) */
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+
+        /** Se hash da senha nao bate com hash salvo no database */
+        if (!(await user.checkPassword(password))) {
+          return res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** Se email foi encontrado e senha estiver correta salva 'id' e 'name' */
+        const { id, name } = user;
+
+        return res.json({
+          /** Retorna dados do usuario para o cliente */
+          user: { id, name, email },
+          /** Retorna jwt token */
+          token: jwt.sign(
+            /** Envia payload */
+            {
+              id,
+            },
+            /** Envia string secreta aleatoria (ex.: gerada pelo md5online.org) */
+            authConfig.secret,
+            /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+            { expiresIn: authConfig.expiresIn }
+          ),
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new SessionController();
+
+    ```
+
+     P: por que criar session controller se ja temos user controller?
+      R: porque estamos criando uma sessao e nao um usuario. É preciso pensar na entidade que está tratando no momento. Até porque o UserController já tem o método `store()` e so podemos ter uma vez o mesmo metodo em uma classe e so podemos ter cinco metodos (index, show, store, update e delete) dentro de um controller.
+
+  * Edita **models/User.js** para criar metodo de verificacao de senha usando 'bcryptjs':
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import Sequelize, { Model } from 'sequelize';
+    import bcrypt from 'bcryptjs';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    /**
+    * Cria classe User extendendo os metodos da classe Model, da dependencia
+    * 'sequelize'
+    */
+    class User extends Model {
+      /**
+      * Metodo estatico que sera chamado automaticamente pelo sequelize
+      */
+      static init(sequelize) {
+        /**
+        * Chama metodo init da classe superior (Model) enviando colunas da base
+        * de dados e envia somente o que o usuario vai fornecer como input.
+        * (chave primaria, etc, nao sao necessarias)
+        */
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password: Sequelize.VIRTUAL, // Campo sem correspondencia no database
+            password_hash: Sequelize.STRING,
+            provider: Sequelize.BOOLEAN,
+          },
+          {
+            /*
+            ** Argumento que sera enviado pelo loader de models
+            */
+            sequelize,
+          }
+        );
+
+        /**
+        * Hooks: Funcionalidade do sequelize -> trecho de codigo executados de
+        * forma automatica baseado em acoes que acontecem no nosso model.
+        *
+        * Hook 'before save': executa trecho de codigo antes de objeto ser salvo
+        * no banco de dados (criado ou editado).
+        */
+        this.addHook('beforeSave', async user => {
+          /** Se houver password na requisicao */
+          if (user.password) {
+            /**
+            * Aguarda e define password_hash como 8 rouds de criptografia da string
+            * enviada.
+            */
+            user.password_hash = await bcrypt.hash(user.password, 8);
+          }
+        });
+
+        /** Retorna model que acaba de ser inicializado */
+        return this;
+      }
+
+      /** Recebe senha enviada pelo cliente */
+      checkPassword(password) {
+        /**
+        * Retorna comparacao entre hash da senha enviada com hash salvo no
+        * banco de dados.
+        *
+        * Retorna 'true' caso senhas sejam iguais.
+        */
+        return bcrypt.compare(password, this.password_hash);
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default User;
+
+    ```
+
+  * Edita **src/routes.js** criando a rota que vai acessar session controller:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import { Router } from 'express';
+    import UserController from './app/controllers/UserController';
+    import SessionController from './app/controllers/SessionController';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    const routes = new Router();
+
+    /** Define rota post para criar novo usuario */
+    routes.post('/users', UserController.store);
+    /** Define rota post para criar nova session */
+    routes.post('/sessions', SessionController.store);
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default routes;
+    ```
+
+  * Cria arquivo **config/auth.js** para separar segredo e expiracao do token em outro arquivo:
+
+    ```js
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default {
+      /** String secreta aleatoria (ex.: gerada no md5online.org) */
+      secret: '5ed32cb43d6810f8b9271a6858613e94',
+      /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+      expiresIn: '7d',
+    };
+    ```
+
+  * (insomnia):
+    * Cria pasta 'Sessions';
+    * Duplica requsicao 'Create' de 'Users' e coloca na pasta 'Sessions';
+    * Muda rota da requisicao 'Sessions'>'Create' para: `base_url/sessions` ;
+    * Deleta atributo "name" do corpo da requisicao;
+    * Clica em 'Send' para enviar requisicao e avalia retorno;
+
+    * Request example:
+    ![](img/02-13-autenticacao-jwt-request.PNG)
+
+    * Response example:
+    ![](img/02-13-autenticacao-jwt-response.PNG)
+
+## 14 Middleware de autenticacao
+[Voltar para índice](#indice)
+
+  Objetivo: Bloquear acesso de usuario a alguma rota caso ele ainda nao esteja logado (autenticado). Ex.: edicao do usuario.
+
+  * Edita **UserController.js** criando metodo asincrono de update do usuario:
+
+    ```js
+    /** Metodo de alteracao dos dados do usuario */
+    async update(req, res) {
+      return res.json({ ok: true });
+    }
+    ```
+
+  * Cria rota de acesso tipo PUT para '/users' no **routes.js**:
+
+    ```js
+    /** Define rota PUT para editar dados do usuario */
+    routes.put('/users', UserController.update);
+    ```
+
+  * (insomnia) Cria requisicao 'Users'>'Update' tipo PUT;
+  * (insomnia) envia requisicao e confirma se esta recebendo o retorno ```{ok: true}``` ;
+
+  Obs.: Para evitar que rota de alteracao de usuario seja acessada por usuarios que nao estejam autenticados usamos middlewares, a melhor forma de interceptar requesicoes para fazer validacoes antes de serem executadas.
+
+  * Middleware precisa verificar se usuario esta logado;
+    * Como?
+      * Utilizando o token gerado durante o login em toda proxima requisicao que o usuario fizer;
+    * Onde que enviamos o token?
+      * Enviamos pelo header da aplicacao:
+
+      * (insomnia):
+        * Forma 1:
+          * Na requisicao PUT .../users, clica na aba Header;
+          * Cria new Header;
+            * Nome do header: 'Authorization';
+            * Valor do header: 'Bearer '+ token gerado durante login (ex.: *Bearer adsigadisfjsdlfi1139804tmnlijasdflkaj213.2oiajsdf098afas0f98asd.adsklfj08902398uawodikjlkf*);
+
+            ![](02-14-bearer-token-on-header.PNG)
+
+        * Forma 2:
+          * Na requisicao PUT .../users, clica na aba 'Auth' > 'Bearer Token';
+          * No campo token, preenche o valor do token gerado durante login;
+
+          ![](02-14-bearer-token-on-auth.PNG)
+
+  * Cria pasta **app/middlewares** ;
+  * Cria middleware de autenticacao **app/middlewares/auth.js**:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    /**
+    * Importa 'promisify' de 'util', biblioteca padrao que vem com node.
+    * O 'promisify' pega uma funcao de callback e transforma em uma funcao onde se
+    * pode utilizar o async await.
+    */
+    import { promisify } from 'util';
+    import authConfig from '../../config/auth';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    /** Exporta middleware (funcao) usando req, res e next */
+    export default async (req, res, next) => {
+      /** Get authorization header from requisition header */
+      const authHeader = req.headers.authorization;
+      /** Se header nao estiver presente na requisicao */
+      if (!authHeader) {
+        /** Retorna erro */
+        res.status(401).json({ error: 'Token not provided' });
+      }
+
+      /**
+      * Caso contrario, divide a authHeader por espacos, desestrutura, descarta
+      * posicao 0 do array e pega apenas token (posicao 1 do array).
+      */
+      const [, token] = authHeader.split(' ');
+
+      /** Define try catch pois requisicao pode retornar erro */
+      try {
+        /**
+        * Decifra token utilizando metodo jwt.verify
+        * Obs.: jwt.verify usa callback e por isso usamos 'promisify' para
+        * transformar em funcao tipo async await */
+        const decoded = await promisify(jwt.verify)(token, authConfig.secret);
+
+        /** Inclui ID do usuario dentro do nosso req */
+        req.userId = decoded.id;
+
+        /** Se middleware nao retornar erro, requisicao chama o 'next' controller */
+        return next();
+
+        /** Caso jwt.verify retorne erro */
+      } catch (err) {
+        /** Informa que token nao e valido */
+        return res.json({ error: 'Invalid token' });
+      }
+    };
+    ```
+
+  * Importa middleware de autenticacao em **routes.js** ;
+
+    ```js
+    import authMiddleware from './app/middlewares/auth';
+    ```
+
+    Obs.: o middleware de autenticacao pode ser utilizado em **routes.js** de forma local ou global (aplicado a uma rota especifica ou para varias rotas que venham apos sua declaracao);
+
+      * Utilizacao local:
+
+        ```js
+        routes.put('/users', authMiddleware, UserController.update);
+        ```
+
+      * Utilizacao global (antes das rotas que precisam ser interceptadas pelo middleware):
+
+        ```js
+        /** Usa authMiddleware em rotas que vierem apos esta declaracao */
+        routes.use(authMiddleware);
+      ```
+
+    * Arquivo **routes.js** atualizado:
+
+      ```js
+      /* --------------------------------- IMPORTS ---------------------------------*/
+      import { Router } from 'express';
+      import UserController from './app/controllers/UserController';
+      import SessionController from './app/controllers/SessionController';
+      import authMiddleware from './app/middlewares/auth';
+
+      /* --------------------------------- CONTENT ---------------------------------*/
+      const routes = new Router();
+
+      /** Define rota PUT para criar novo usuario */
+      routes.post('/users', UserController.store);
+      /** Define rota POST para criar nova session */
+      routes.post('/sessions', SessionController.store);
+
+      /** Define MIDDLEWARE GLOBAL que vale para rotas que vem apos sua declaracao */
+      routes.use(authMiddleware);
+      /** Define rota PUT para editar dados do usuario */
+      routes.put('/users', UserController.update);
+
+      /* --------------------------------- EXPORTS ---------------------------------*/
+      export default routes;
+      ```
+
+  * Atualiza metodo 'update' de **UserController.js** conferindo se esta recebendo valor de userId adicionado a requisicao pelo middleware de autenticacao criado:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+
+      /** Metodo de alteracao dos dados do usuario */
+      async update(req, res) {
+        /** Pega id do usuario inserido na requisicao atravez do middleware de autenticacao */
+        console.log(req.userId);
+
+        /** Retorna json */
+        return res.json({ ok: true });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+    ```
+
+## 15 Update do usuario
+[Voltar para índice](#indice)
+
+  Objetivo: permitir que usuario altere dados cadastrais.
+
+  * (insomnia) edita requisicao 'Users'>'Update' tipo PUT alterando corpo para:
+
+    ```js
+    {
+      "name":"test user",
+      "email": "testuser@email.com",
+      "oldPassword":"123456",
+      "password": "123456"
+    }
+    ```
+
+  * Atualiza metodo `update()` do arquivo **UserController.js** adicionando leitura e verificacao de informacoes enviadas na requisicao de atualizacao do usuario:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.status(400).json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+
+      /** Metodo de alteracao dos dados do usuario */
+      async update(req, res) {
+        /** Busca email e oldPassword de dentro do req.body */
+        const { email, oldPassword, password } = req.body;
+
+        /** Get current user information */
+        const user = await User.findByPk(req.userId);
+
+        /** If user is changing the email adress */
+        if (email !== user.email) {
+          /** Verify if new email already exists in the database */
+          const userExists = await User.findOne({
+            where: { email },
+          });
+
+          /** If email is already taken return error */
+          if (userExists) {
+            return res.status(400).json({ error: 'User already exists!' });
+          }
+        }
+
+        /** If user has informed new password without informing old password */
+        if (password && !oldPassword) {
+          /** ...return arror 401 and request user to inform old password */
+          res.status(401).json({ error: 'Inform old password' });
+        }
+
+        /**
+        * If user has informed old password and (&&) it does not match with its old
+        * password...
+        */
+        if (oldPassword && !(await user.checkPassword(oldPassword))) {
+          /**
+          *  ...return error 401
+          */
+          res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** If all requirements were met then updates user informaiton */
+        const { id, name, provider } = await user.update(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+    ```
+
+## 16 Validando dados de entrada
+[Voltar para índice](#indice)
+
+  Objetivo: validar dados de entrada no backend. Geralmente se faz a validacao tanto no backend quanto no frontend. Existem varias bibliotecas e formas de se fazer a validacao. Utilizaremos a biblioteca *Yup* para isso. *Yup* é uma biblioteca de schema validation que é uma forma simples de definir os campos que devem estar presentes dentro do corpo da requisicao no formato JSON e qual seu tipo (ex.: é uma string, obrigatoria, minimo 6 digitos, etc..).
+
+  * (terminal) instala *Yup*: `yarn add yup` ;
+  * Edita arquivo **UserController.js** adicionando *Yup* para schema validation nos metodos *store()* e *update()*:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    /** Importa tudo de yup como Yup (dependencia nao tem export default) */
+    import * as Yup from 'yup';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Define schema to validate req.body prior to 'store()' data */
+        const schema = Yup.object().shape({
+          /** Attribute 'name' is a required string */
+          name: Yup.string().required(),
+          /** Attribute 'email' is a required string with email format */
+          email: Yup.string()
+            .email()
+            .required(),
+          /** Attribute 'password' is a required string with at least 6 digits */
+          password: Yup.string()
+            .required()
+            .min(6),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.status(400).json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+
+      /** Metodo de alteracao dos dados do usuario */
+      async update(req, res) {
+        /** Define schema to validate req.body prior to 'update()' method */
+        const schema = Yup.object().shape({
+          /** Attribute 'name' is a string */
+          name: Yup.string(),
+          /** Attribute 'email' is a string with email format */
+          email: Yup.string().email(),
+          /** Attribute 'password' is a string with at least 6 digits */
+          password: Yup.string().min(6),
+          /** Attribute 'oldPassword' is a string with at least 6 digits */
+          oldPassword: Yup.string()
+            .min(6)
+            /**
+            * ... and when password is sent, this field (oldPassword) is required.
+            * In the video the instructor does the opposite (when oldPassword is
+            * sent, 'password' is required) but it result in a bug (user can change)
+            * its password without informing the oldPassword. So I decided to do it
+            * differently here. */
+            .when('password', (password, field) =>
+              password ? field.required() : field
+            ),
+          /** Attribute 'checkPassword' is a string */
+          confirmPassword: Yup.string()
+            /**
+            * ... and when password is present, this field (confirmPassword) must
+            * be equal to 'password'
+            */
+            .when('password', (password, field) =>
+              password ? field.required().oneOf([Yup.ref('password')]) : field
+            ),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+
+        /** Busca email e oldPassword de dentro do req.body */
+        const { email, oldPassword } = req.body;
+
+        /** Get current user information */
+        const user = await User.findByPk(req.userId);
+
+        /** If user is changing the email adress */
+        if (email !== user.email) {
+          /** Verify if new email already exists in the database */
+          const userExists = await User.findOne({
+            where: { email },
+          });
+
+          /** If email is already taken return error */
+          if (userExists) {
+            return res.status(400).json({ error: 'User already exists!' });
+          }
+        }
+
+        /**
+        * If user has informed old password and (&&) it does not match with its old
+        * password...
+        */
+        if (oldPassword && !(await user.checkPassword(oldPassword))) {
+          /**
+          *  ...return error 401
+          */
+          res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** If all requirements were met then updates user informaiton */
+        const { id, name, provider } = await user.update(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+
+    ```
+
+  * Edita arquivo **SessionController.js** adicionando *Yup* para schema validation no metodo *store()*:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    /** Importa tudo de yup como Yup (dependencia nao tem export default) */
+    import * as Yup from 'yup';
+    import authConfig from '../../config/auth';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class SessionController {
+      async store(req, res) {
+        /** Define schema to validate req.body prior to 'store()' data */
+        const schema = Yup.object().shape({
+          /** Attribute 'email' is a required string with email format */
+          email: Yup.string()
+            .email()
+            .required(),
+          /** Attribute 'password' is a required string */
+          password: Yup.string().required(),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+        /** Salva email e senha recebidos no corpo da requisicao */
+        const { email, password } = req.body;
+
+        /** Encontra usuario que tem campo email = variavel email (short sintax) */
+        const user = await User.findOne({ where: { email } });
+
+        /** Se usuario nao existe retorna erro 401 (nao autorizado) */
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+
+        /** Se hash da senha nao bate com hash salvo no database */
+        if (!(await user.checkPassword(password))) {
+          return res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** Se email foi encontrado e senha estiver correta salva 'id' e 'name' */
+        const { id, name } = user;
+
+        return res.json({
+          /** Retorna dados do usuario para o cliente */
+          user: { id, name, email },
+          /** Retorna jwt token */
+          token: jwt.sign(
+            /** Envia payload */
+            {
+              id,
+            },
+            /** Envia string secreta aleatoria (ex.: gerada pelo md5online.org) */
+            authConfig.secret,
+            /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+            { expiresIn: authConfig.expiresIn }
+          ),
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new SessionController();
+    ```
+
+  * (insomnia) Testa diferentes condicoes de validacao de sessao e de edicao de usuario:
+    * Sessao:
+      * Requisicao sem senha;
+      * Requisicao sem email;
+      * Requisicao com email e senha que nao combinam;
+      * Requisicao com email sem formato de email;
+      * [...];
+    * Edicao:
+      * Requisicao com 'password' e sem 'oldPassword';
+      * Requisicao com 'password' e 'confirmPassword' diferentes;
+      * [...];
