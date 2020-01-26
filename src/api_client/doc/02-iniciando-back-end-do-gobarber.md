@@ -16,6 +16,7 @@
   * [11 Gerando hash da senha](#11-gerando-hash-da-senha)
   * [12 Conceitos de JWT](#12-conceitos-de-jwt)
   * [13 Autenticacao JWT](#13-autenticacao-jwt)
+  * [14 Middleware de autenticacao](#14-middleware-de-autenticacao)
 
 ## 00 Configurando estrutura
 [Voltar para índice](#indice)
@@ -1108,3 +1109,202 @@
 
     * Response example:
     ![](img/02-13-autenticacao-jwt-response.PNG)
+
+## 14 Middleware de autenticacao
+[Voltar para índice](#indice)
+
+  Objetivo: Bloquear acesso de usuario a alguma rota caso ele ainda nao esteja logado (autenticado). Ex.: edicao do usuario.
+
+  * Edita **UserController.js** criando metodo asincrono de update do usuario:
+
+    ```js
+    /** Metodo de alteracao dos dados do usuario */
+    async update(req, res) {
+      return res.json({ ok: true });
+    }
+    ```
+
+  * Cria rota de acesso tipo PUT para '/users' no **routes.js**:
+
+    ```js
+    /** Define rota PUT para editar dados do usuario */
+    routes.put('/users', UserController.update);
+    ```
+
+  * (insomnia) Cria requisicao 'Users'>'Update' tipo PUT;
+  * (insomnia) envia requisicao e confirma se esta recebendo o retorno ```{ok: true}``` ;
+
+  Obs.: Para evitar que rota de alteracao de usuario seja acessada por usuarios que nao estejam autenticados usamos middlewares, a melhor forma de interceptar requesicoes para fazer validacoes antes de serem executadas.
+
+  * Middleware precisa verificar se usuario esta logado;
+    * Como?
+      * Utilizando o token gerado durante o login em toda proxima requisicao que o usuario fizer;
+    * Onde que enviamos o token?
+      * Enviamos pelo header da aplicacao:
+
+      * (insomnia):
+        * Forma 1:
+          * Na requisicao PUT .../users, clica na aba Header;
+          * Cria new Header;
+            * Nome do header: 'Authorization';
+            * Valor do header: 'Bearer '+ token gerado durante login (ex.: *Bearer adsigadisfjsdlfi1139804tmnlijasdflkaj213.2oiajsdf098afas0f98asd.adsklfj08902398uawodikjlkf*);
+
+            ![](02-14-bearer-token-on-header.PNG)
+
+        * Forma 2:
+          * Na requisicao PUT .../users, clica na aba 'Auth' > 'Bearer Token';
+          * No campo token, preenche o valor do token gerado durante login;
+
+          ![](02-14-bearer-token-on-auth.PNG)
+
+  * Cria pasta **app/middlewares** ;
+  * Cria middleware de autenticacao **app/middlewares/auth.js**:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    /**
+    * Importa 'promisify' de 'util', biblioteca padrao que vem com node.
+    * O 'promisify' pega uma funcao de callback e transforma em uma funcao onde se
+    * pode utilizar o async await.
+    */
+    import { promisify } from 'util';
+    import authConfig from '../../config/auth';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    /** Exporta middleware (funcao) usando req, res e next */
+    export default async (req, res, next) => {
+      /** Get authorization header from requisition header */
+      const authHeader = req.headers.authorization;
+      /** Se header nao estiver presente na requisicao */
+      if (!authHeader) {
+        /** Retorna erro */
+        res.status(401).json({ error: 'Token not provided' });
+      }
+
+      /**
+      * Caso contrario, divide a authHeader por espacos, desestrutura, descarta
+      * posicao 0 do array e pega apenas token (posicao 1 do array).
+      */
+      const [, token] = authHeader.split(' ');
+
+      /** Define try catch pois requisicao pode retornar erro */
+      try {
+        /**
+        * Decifra token utilizando metodo jwt.verify
+        * Obs.: jwt.verify usa callback e por isso usamos 'promisify' para
+        * transformar em funcao tipo async await */
+        const decoded = await promisify(jwt.verify)(token, authConfig.secret);
+
+        /** Inclui ID do usuario dentro do nosso req */
+        req.userId = decoded.id;
+
+        /** Se middleware nao retornar erro, requisicao chama o 'next' controller */
+        return next();
+
+        /** Caso jwt.verify retorne erro */
+      } catch (err) {
+        /** Informa que token nao e valido */
+        return res.json({ error: 'Invalid token' });
+      }
+    };
+    ```
+
+  * Importa middleware de autenticacao em **routes.js** ;
+
+    ```js
+    import authMiddleware from './app/middlewares/auth';
+    ```
+
+    Obs.: o middleware de autenticacao pode ser utilizado em **routes.js** de forma local ou global (aplicado a uma rota especifica ou para varias rotas que venham apos sua declaracao);
+
+      * Utilizacao local:
+
+        ```js
+        routes.put('/users', authMiddleware, UserController.update);
+        ```
+
+      * Utilizacao global (antes das rotas que precisam ser interceptadas pelo middleware):
+
+        ```js
+        /** Usa authMiddleware em rotas que vierem apos esta declaracao */
+        routes.use(authMiddleware);
+      ```
+
+    * Arquivo **routes.js** atualizado:
+
+      ```js
+      /* --------------------------------- IMPORTS ---------------------------------*/
+      import { Router } from 'express';
+      import UserController from './app/controllers/UserController';
+      import SessionController from './app/controllers/SessionController';
+      import authMiddleware from './app/middlewares/auth';
+
+      /* --------------------------------- CONTENT ---------------------------------*/
+      const routes = new Router();
+
+      /** Define rota PUT para criar novo usuario */
+      routes.post('/users', UserController.store);
+      /** Define rota POST para criar nova session */
+      routes.post('/sessions', SessionController.store);
+
+      /** Define MIDDLEWARE GLOBAL que vale para rotas que vem apos sua declaracao */
+      routes.use(authMiddleware);
+      /** Define rota PUT para editar dados do usuario */
+      routes.put('/users', UserController.update);
+
+      /* --------------------------------- EXPORTS ---------------------------------*/
+      export default routes;
+      ```
+
+  * Atualiza metodo 'update' de **UserController.js** conferindo se esta recebendo valor de userId adicionado a requisicao pelo middleware de autenticacao criado:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+
+      /** Metodo de alteracao dos dados do usuario */
+      async update(req, res) {
+        /** Pega id do usuario inserido na requisicao atravez do middleware de autenticacao */
+        console.log(req.userId);
+
+        /** Retorna json */
+        return res.json({ ok: true });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+    ```
