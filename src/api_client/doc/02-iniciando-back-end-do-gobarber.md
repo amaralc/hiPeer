@@ -919,5 +919,5 @@
         * Quando frontend precisar obter informacoes de dentro do token, ele vai precisar
           saber qual tipo de criptografia foi utilizada.
       * Payload: contem informacoes nao sensiveis, para caso seja necessario utiliza-las
-        em algum lugar.
+        em algum lugar;
       * Assinatura: garante que token nao foi modificado externamente por outro usuario;
