@@ -737,6 +737,7 @@
     // EXPORTS  ---------------------------------------------------------------------
     export default routes;
     ```
+
 ## 10 Cadastro de usuarios
 [Voltar para índice](#indice)
 
@@ -897,9 +898,26 @@
   * (insomnia) envia requisicao e verifica se usuario foi criado no banco de dados;
   * (postbird) atualiza conexao e verifica se hash da senha do usuario foi armazenada;
 
+## 12 Conceitos de JWT
+[Voltar para índice](#indice)
 
+  Objetivo: entender os conceitos de autenticação JWT.
 
+  * JWT: JSON Web Token;
+  * O que é: um método de fazer autenticação em API REST [Representational state transfer](https://en.wikipedia.org/wiki/Representational_state_transfer);
 
+  ![](img/02-12-conceitos-de-jwt.PNG)
 
-
-
+  * Exemplo:
+    * Usuario envia 'email' e 'password' para rota '/sessions' conforme figura acima;
+    * Rota faz verificacoes de que precisa, vai ao banco de dados e verifica se informacoes
+      estao corretas;
+    * Se informacoes estiverem corretas, rota geram token JWT;
+    * Token é gerado a partir de biblioteca;
+    * Token tem formato conforme imagem acima, com tres hashs separadas por '.';
+      * Headers: guardam tipo de token gerado e algoritmo utilizado para gerar;
+        * Quando frontend precisar obter informacoes de dentro do token, ele vai precisar
+          saber qual tipo de criptografia foi utilizada.
+      * Payload: contem informacoes nao sensiveis, para caso seja necessario utiliza-las
+        em algum lugar.
+      * Assinatura: garante que token nao foi modificado externamente por outro usuario;
