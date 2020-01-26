@@ -13,6 +13,7 @@
   * [08 Model de usuario](#08-model-de-usuario)
   * [09 Criando loader de models](#09-criando-loader-de-models)
   * [10 Cadastro de usuarios](#10-cadastro-de-usuarios)
+  * [11 Gerando hash da senha](#11-gerando-hash-da-senha)
 
 ## 00 Configurando estrutura
 [Voltar para índice](#indice)
@@ -831,6 +832,70 @@
     * Em caso de erro do tipo 'SequelizeUniqueConstraintError: Validation error',
       verifique se o codigo esta verificando e bloqueando fluxo da requisicao caso
       email ja esteja cadastrado;
+
+## 11 Gerando hash da senha
+[Voltar para índice](#indice)
+
+  Objetivo: gerar o hash da senha do usuario para armazenar no banco de dados.
+  Story: usuario envia senha sem hash, hash da senha é gerado e armazenado.
+
+  * (terminal) instala dependencia bcryptjs: `yarn add bcryptjs` ;
+  * Edita model de usuario (**User.js**):
+    * Importa bcrypt :
+
+      ```js
+      import bcrypt from 'bcryptjs';
+      ```
+
+    * Cria novo atributo 'password' dentro do model:
+
+      ```js
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        passowrd: Sequelize.VIRTUAL, // Campo sem correspondencia no database
+        password_hash: Sequelize.STRING,
+        provider: Sequelize.BOOLEAN,
+      },
+      ```
+
+    * Adiciona hook apos `super.init()`:
+
+      ```js
+      /**
+       * Hooks: Funcionalidade do sequelize -> trecho de codigo executados de
+      * forma automatica baseado em acoes que acontecem no nosso model.
+      *
+      * Hook 'before save': executa trecho de codigo antes de objeto ser salvo
+      * no banco de dados (criado ou editado).
+      */
+      this.addHook('beforeSave', async user => {
+        /** Se houver password na requisicao */
+        if (user.password) {
+          /**
+           * Aguarda e define password_hash como 8 rouds de criptografia da string
+          * enviada.
+          */
+          user.password_hash = await bcrypt.hash(user.password, 8);
+        }
+      });
+
+      /** Retorna model que acaba de ser inicializado */
+      return this;
+      ```
+
+  * (insomnia) edita corpo da requisicao para enviar password ao inves de password_hash:
+
+    ```js
+    {
+      "name": "user x",
+      "email": "emailx@email.com",
+      "password": "123456"
+    }
+    ```
+
+  * (insomnia) envia requisicao e verifica se usuario foi criado no banco de dados;
+  * (postbird) atualiza conexao e verifica se hash da senha do usuario foi armazenada;
 
 
 
