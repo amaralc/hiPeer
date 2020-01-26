@@ -18,6 +18,7 @@
   * [13 Autenticacao JWT](#13-autenticacao-jwt)
   * [14 Middleware de autenticacao](#14-middleware-de-autenticacao)
   * [15 Update do usuario](#15-update-do-usuario)
+  * [16 Validando dados de entrada](#16-validando-dados-de-entrada)
 
 ## 00 Configurando estrutura
 [Voltar para índice](#indice)
@@ -1416,3 +1417,235 @@
     /* --------------------------------- EXPORTS ---------------------------------*/
     export default new UserController();
     ```
+
+## 16 Validando dados de entrada
+[Voltar para índice](#indice)
+
+  Objetivo: validar dados de entrada no backend. Geralmente se faz a validacao tanto no backend quanto no frontend. Existem varias bibliotecas e formas de se fazer a validacao. Utilizaremos a biblioteca *Yup* para isso. *Yup* é uma biblioteca de schema validation que é uma forma simples de definir os campos que devem estar presentes dentro do corpo da requisicao no formato JSON e qual seu tipo (ex.: é uma string, obrigatoria, minimo 6 digitos, etc..).
+
+  * (terminal) instala *Yup*: `yarn add yup` ;
+  * Edita arquivo **UserController.js** adicionando *Yup* para schema validation nos metodos *store()* e *update()*:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    /** Importa tudo de yup como Yup (dependencia nao tem export default) */
+    import * as Yup from 'yup';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class UserController {
+      /**
+      * Metodo store com mesma face de um middleware no node.
+      * Recebe dados do usuario e cria novo registro dentro da base de dados.
+      */
+      async store(req, res) {
+        /** Define schema to validate req.body prior to 'store()' data */
+        const schema = Yup.object().shape({
+          /** Attribute 'name' is a required string */
+          name: Yup.string().required(),
+          /** Attribute 'email' is a required string with email format */
+          email: Yup.string()
+            .email()
+            .required(),
+          /** Attribute 'password' is a required string with at least 6 digits */
+          password: Yup.string()
+            .required()
+            .min(6),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+
+        /** Verifica se usuario do corpo da requisicao ja existe */
+        const userExists = await User.findOne({ where: { email: req.body.email } });
+
+        /** Se usuario ja existir, retorna erro */
+        if (userExists) {
+          return res.status(400).json({ error: 'User already exists!' });
+        }
+
+        /**
+        * Cria usuario na base de dados usando resposta asincrona e retorna apenas
+        * dados uteis.
+        */
+        const { id, name, email, provider } = await User.create(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+
+      /** Metodo de alteracao dos dados do usuario */
+      async update(req, res) {
+        /** Define schema to validate req.body prior to 'update()' method */
+        const schema = Yup.object().shape({
+          /** Attribute 'name' is a string */
+          name: Yup.string(),
+          /** Attribute 'email' is a string with email format */
+          email: Yup.string().email(),
+          /** Attribute 'password' is a string with at least 6 digits */
+          password: Yup.string().min(6),
+          /** Attribute 'oldPassword' is a string with at least 6 digits */
+          oldPassword: Yup.string()
+            .min(6)
+            /**
+            * ... and when password is sent, this field (oldPassword) is required.
+            * In the video the instructor does the opposite (when oldPassword is
+            * sent, 'password' is required) but it result in a bug (user can change)
+            * its password without informing the oldPassword. So I decided to do it
+            * differently here. */
+            .when('password', (password, field) =>
+              password ? field.required() : field
+            ),
+          /** Attribute 'checkPassword' is a string */
+          confirmPassword: Yup.string()
+            /**
+            * ... and when password is present, this field (confirmPassword) must
+            * be equal to 'password'
+            */
+            .when('password', (password, field) =>
+              password ? field.required().oneOf([Yup.ref('password')]) : field
+            ),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+
+        /** Busca email e oldPassword de dentro do req.body */
+        const { email, oldPassword } = req.body;
+
+        /** Get current user information */
+        const user = await User.findByPk(req.userId);
+
+        /** If user is changing the email adress */
+        if (email !== user.email) {
+          /** Verify if new email already exists in the database */
+          const userExists = await User.findOne({
+            where: { email },
+          });
+
+          /** If email is already taken return error */
+          if (userExists) {
+            return res.status(400).json({ error: 'User already exists!' });
+          }
+        }
+
+        /**
+        * If user has informed old password and (&&) it does not match with its old
+        * password...
+        */
+        if (oldPassword && !(await user.checkPassword(oldPassword))) {
+          /**
+          *  ...return error 401
+          */
+          res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** If all requirements were met then updates user informaiton */
+        const { id, name, provider } = await user.update(req.body);
+
+        /** Retorna json apenas com dados uteis ao frontend */
+        return res.json({
+          id,
+          name,
+          email,
+          provider,
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new UserController();
+
+    ```
+
+  * Edita arquivo **SessionController.js** adicionando *Yup* para schema validation no metodo *store()*:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    /** Importa tudo de yup como Yup (dependencia nao tem export default) */
+    import * as Yup from 'yup';
+    import authConfig from '../../config/auth';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class SessionController {
+      async store(req, res) {
+        /** Define schema to validate req.body prior to 'store()' data */
+        const schema = Yup.object().shape({
+          /** Attribute 'email' is a required string with email format */
+          email: Yup.string()
+            .email()
+            .required(),
+          /** Attribute 'password' is a required string */
+          password: Yup.string().required(),
+        });
+
+        /** If 'req.body' do not attend to the schema requirements (is not valid) */
+        if (!(await schema.isValid(req.body))) {
+          /** Return error status 400 with message 'Validation has failed' */
+          return res.status(400).json({ error: 'Validation has failed' });
+        }
+        /** Salva email e senha recebidos no corpo da requisicao */
+        const { email, password } = req.body;
+
+        /** Encontra usuario que tem campo email = variavel email (short sintax) */
+        const user = await User.findOne({ where: { email } });
+
+        /** Se usuario nao existe retorna erro 401 (nao autorizado) */
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+
+        /** Se hash da senha nao bate com hash salvo no database */
+        if (!(await user.checkPassword(password))) {
+          return res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** Se email foi encontrado e senha estiver correta salva 'id' e 'name' */
+        const { id, name } = user;
+
+        return res.json({
+          /** Retorna dados do usuario para o cliente */
+          user: { id, name, email },
+          /** Retorna jwt token */
+          token: jwt.sign(
+            /** Envia payload */
+            {
+              id,
+            },
+            /** Envia string secreta aleatoria (ex.: gerada pelo md5online.org) */
+            authConfig.secret,
+            /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+            { expiresIn: authConfig.expiresIn }
+          ),
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new SessionController();
+    ```
+
+  * (insomnia) Testa diferentes condicoes de validacao de sessao e de edicao de usuario:
+    * Sessao:
+      * Requisicao sem senha;
+      * Requisicao sem email;
+      * Requisicao com email e senha que nao combinam;
+      * Requisicao com email sem formato de email;
+      * [...];
+    * Edicao:
+      * Requisicao com 'password' e sem 'oldPassword';
+      * Requisicao com 'password' e 'confirmPassword' diferentes;
+      * [...];
