@@ -1310,7 +1310,7 @@
     export default new UserController();
     ```
 
-    ## 15 Update do usuario
+## 15 Update do usuario
 [Voltar para índice](#indice)
 
   Objetivo: permitir que usuario altere dados cadastrais.
