@@ -30,6 +30,15 @@ class UserController {
       provider,
     });
   }
+
+  /** Metodo de alteracao dos dados do usuario */
+  async update(req, res) {
+    /** Pega id do usuario inserido na requisicao atravez do middleware de autenticacao */
+    console.log(req.userId);
+
+    /** Retorna json */
+    return res.json({ ok: true });
+  }
 }
 
 /* --------------------------------- EXPORTS ---------------------------------*/
