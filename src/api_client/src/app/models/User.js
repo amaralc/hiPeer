@@ -54,6 +54,17 @@ class User extends Model {
     /** Retorna model que acaba de ser inicializado */
     return this;
   }
+
+  /** Recebe senha enviada pelo cliente */
+  checkPassword(password) {
+    /**
+     * Retorna comparacao entre hash da senha enviada com hash salvo no
+     * banco de dados.
+     *
+     * Retorna 'true' caso senhas sejam iguais.
+     */
+    return bcrypt.compare(password, this.password_hash);
+  }
 }
 
 /* --------------------------------- EXPORTS ---------------------------------*/

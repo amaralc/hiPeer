@@ -14,6 +14,8 @@
   * [09 Criando loader de models](#09-criando-loader-de-models)
   * [10 Cadastro de usuarios](#10-cadastro-de-usuarios)
   * [11 Gerando hash da senha](#11-gerando-hash-da-senha)
+  * [12 Conceitos de JWT](#12-conceitos-de-jwt)
+  * [13 Autenticacao JWT](#13-autenticacao-jwt)
 
 ## 00 Configurando estrutura
 [Voltar para índice](#indice)
@@ -921,3 +923,188 @@
       * Payload: contem informacoes nao sensiveis, para caso seja necessario utiliza-las
         em algum lugar;
       * Assinatura: garante que token nao foi modificado externamente por outro usuario;
+
+## 13 Autenticacao JWT
+[Voltar para índice](#indice)
+
+  Objetivo: fazer parte de autenticacao do usuario.
+
+  * (terminal) instala dependencia jsonwebtoken: `yarn add jsonwebtoken` ;
+
+  * Cria session controller no arquivo **controllers/SessionController.js**:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import jwt from 'jsonwebtoken';
+    import authConfig from '../../config/auth';
+    import User from '../models/User';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    class SessionController {
+      async store(req, res) {
+        /** Salva email e senha recebidos no corpo da requisicao */
+        const { email, password } = req.body;
+
+        /** Encontra usuario que tem campo email = variavel email (short sintax) */
+        const user = await User.findOne({ where: { email } });
+
+        /** Se usuario nao existe retorna erro 401 (nao autorizado) */
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+
+        /** Se hash da senha nao bate com hash salvo no database */
+        if (!(await user.checkPassword(password))) {
+          return res.status(401).json({ error: 'Password does not match' });
+        }
+
+        /** Se email foi encontrado e senha estiver correta salva 'id' e 'name' */
+        const { id, name } = user;
+
+        return res.json({
+          /** Retorna dados do usuario para o cliente */
+          user: { id, name, email },
+          /** Retorna jwt token */
+          token: jwt.sign(
+            /** Envia payload */
+            {
+              id,
+            },
+            /** Envia string secreta aleatoria (ex.: gerada pelo md5online.org) */
+            authConfig.secret,
+            /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+            { expiresIn: authConfig.expiresIn }
+          ),
+        });
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default new SessionController();
+
+    ```
+
+     P: por que criar session controller se ja temos user controller?
+      R: porque estamos criando uma sessao e nao um usuario. É preciso pensar na entidade que está tratando no momento. Até porque o UserController já tem o método `store()` e so podemos ter uma vez o mesmo metodo em uma classe e so podemos ter cinco metodos (index, show, store, update e delete) dentro de um controller.
+
+  * Edita **models/User.js** para criar metodo de verificacao de senha usando 'bcryptjs':
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import Sequelize, { Model } from 'sequelize';
+    import bcrypt from 'bcryptjs';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    /**
+    * Cria classe User extendendo os metodos da classe Model, da dependencia
+    * 'sequelize'
+    */
+    class User extends Model {
+      /**
+      * Metodo estatico que sera chamado automaticamente pelo sequelize
+      */
+      static init(sequelize) {
+        /**
+        * Chama metodo init da classe superior (Model) enviando colunas da base
+        * de dados e envia somente o que o usuario vai fornecer como input.
+        * (chave primaria, etc, nao sao necessarias)
+        */
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password: Sequelize.VIRTUAL, // Campo sem correspondencia no database
+            password_hash: Sequelize.STRING,
+            provider: Sequelize.BOOLEAN,
+          },
+          {
+            /*
+            ** Argumento que sera enviado pelo loader de models
+            */
+            sequelize,
+          }
+        );
+
+        /**
+        * Hooks: Funcionalidade do sequelize -> trecho de codigo executados de
+        * forma automatica baseado em acoes que acontecem no nosso model.
+        *
+        * Hook 'before save': executa trecho de codigo antes de objeto ser salvo
+        * no banco de dados (criado ou editado).
+        */
+        this.addHook('beforeSave', async user => {
+          /** Se houver password na requisicao */
+          if (user.password) {
+            /**
+            * Aguarda e define password_hash como 8 rouds de criptografia da string
+            * enviada.
+            */
+            user.password_hash = await bcrypt.hash(user.password, 8);
+          }
+        });
+
+        /** Retorna model que acaba de ser inicializado */
+        return this;
+      }
+
+      /** Recebe senha enviada pelo cliente */
+      checkPassword(password) {
+        /**
+        * Retorna comparacao entre hash da senha enviada com hash salvo no
+        * banco de dados.
+        *
+        * Retorna 'true' caso senhas sejam iguais.
+        */
+        return bcrypt.compare(password, this.password_hash);
+      }
+    }
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default User;
+
+    ```
+
+  * Edita **src/routes.js** criando a rota que vai acessar session controller:
+
+    ```js
+    /* --------------------------------- IMPORTS ---------------------------------*/
+    import { Router } from 'express';
+    import UserController from './app/controllers/UserController';
+    import SessionController from './app/controllers/SessionController';
+
+    /* --------------------------------- CONTENT ---------------------------------*/
+    const routes = new Router();
+
+    /** Define rota post para criar novo usuario */
+    routes.post('/users', UserController.store);
+    /** Define rota post para criar nova session */
+    routes.post('/sessions', SessionController.store);
+
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default routes;
+    ```
+
+  * Cria arquivo **config/auth.js** para separar segredo e expiracao do token em outro arquivo:
+
+    ```js
+    /* --------------------------------- EXPORTS ---------------------------------*/
+    export default {
+      /** String secreta aleatoria (ex.: gerada no md5online.org) */
+      secret: '5ed32cb43d6810f8b9271a6858613e94',
+      /** Envia data de expiracao obrigatoria do token (padrao: 7 dias) */
+      expiresIn: '7d',
+    };
+    ```
+
+  * (insomnia):
+    * Cria pasta 'Sessions';
+    * Duplica requsicao 'Create' de 'Users' e coloca na pasta 'Sessions';
+    * Muda rota da requisicao 'Sessions'>'Create' para: `base_url/sessions` ;
+    * Deleta atributo "name" do corpo da requisicao;
+    * Clica em 'Send' para enviar requisicao e avalia retorno;
+
+    * Request example:
+    ![](img/02-13-autenticacao-jwt-request.PNG)
+
+    * Response example:
+    ![](img/02-13-autenticacao-jwt-response.PNG)
