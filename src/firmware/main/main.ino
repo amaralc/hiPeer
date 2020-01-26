@@ -121,7 +121,13 @@ void setup() {
   }
 
   // message user to validate session
-  Serial.println("Pass your card to validate new session");
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.print("Pass your card to validate new session");
+  display.display();
+  // Serial.println("Pass your card to validate new session");
 
 }
 
@@ -130,15 +136,9 @@ void loop() {
 
   // OLED Display -------------------------------------------
 
-  display.display();
-  display.clearDisplay();
-  display.setTextColor(WHITE);
-  display.setTextSize(1);
-  display.setCursor(0,20);
-  display.print("Hello World!");
+  
 
   // Is user still active?
-
   if (userState != 1){
     // Has a card been detected?
     if (RC522.isCard())
@@ -146,8 +146,15 @@ void loop() {
       // If so then get its serial number
       RC522.readCardSerial();
   
-      // Print card detected
-      Serial.println("Card detected:");
+      // Print card detected      
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Card detected!");      
+      display.display();
+      delay(1000);
+      //Serial.println("Card detected:");
   
       // Print serial number
       for(int i=0;i<5;i++)
@@ -180,7 +187,15 @@ void loop() {
     Serial.println(userState);
     Serial.println("Valid user");
     Serial.println();
-    Serial.println("Type the number of the container you wish to open :");
+
+    // Ask for the number of the container
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.setCursor(0,0);
+    display.print("Type the number of the container you wish to open and press # to open it: ");
+    display.display();
+    // Serial.println("Type the number of the container you wish to open :");
     delay(200);
   }
 
@@ -192,10 +207,28 @@ void loop() {
   if (isDigit(inputChar)) {
     // convert the incoming byte to a char and add it to the string:
     inputString += (char)inputChar;
+
+    // Print number entered
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.setCursor(0,0);
+    display.print("Type the number of the container you wish to open and press # to open it: "+ inputString);
+    display.display();
+    
   }
 
   // if you get a '#', print the string, then the string's value:
   if (inputChar == '#') {
+
+      // print selected number
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Selected container: "+ inputString);
+      display.display();
+      delay(1000);
 
       // if user is valid
       if(userState == 1){
@@ -206,20 +239,31 @@ void loop() {
         // if number is out of range
         if ((inputInteger < 1) || (inputInteger > 12)){
 
-          // print selected number
-          Serial.print("Selected container:");
-          Serial.println(inputInteger);
+          // clean inputString
+          inputString = "";
 
           // print error message
-          Serial.println("Error: Number of container must be an integer between 1 and 12");
-          Serial.println("Type the number of the container you wish to open :");
-          inputString = "";
+          display.clearDisplay();
+          display.setTextColor(WHITE);
+          display.setTextSize(1);
+          display.setCursor(0,0);
+          display.print("Error: Number of container must be an integer between 1 and 12");
+          display.display();
+          delay(2500);          
+          //Serial.println("Error: Number of container must be an integer between 1 and 12");
+
+          // ask for new entry
+          display.clearDisplay();
+          display.setTextColor(WHITE);
+          display.setTextSize(1);
+          display.setCursor(0,0);
+          display.print("Type the number of the container you wish to open and press # to open it: "+ inputString);
+          display.display();
+          //Serial.println("Type the number of the container you wish to open :");
+          
 
         // else, if number is within the range
         } else {
-
-          Serial.print("Selected container:");
-          Serial.println(inputInteger);
 
           // define 'containerPin' according to user input
           containerPin = containerPins[inputInteger - 1];
@@ -238,7 +282,14 @@ void loop() {
       } else {
 
         // message user to validate session
-        Serial.println("Pass your card to validate session before selecting the container");
+        display.clearDisplay();
+        display.setTextColor(WHITE);
+        display.setTextSize(1);
+        display.setCursor(0,0);
+        display.print("Pass your card to validate session before selecting the container");
+        display.display();
+        delay(1000);
+        //Serial.println("Pass your card to validate session before selecting the container");
 
         // reset input string
         inputString = "";
@@ -248,13 +299,28 @@ void loop() {
     };
 
     // if user is valid and 'containerState' is active
-    if ((userState ==1)&&(containerState == 1)){
+    if ((userState ==1)&&(containerState == 1)){      
+
+      // message user about countdown time
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("The selected container will be opened for 3 seconds. Hurry up!");
+      display.display();
+      delay(2500);
+
+      // inform user that container is being opened
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Opening container...");
+      display.display();
+      delay(200);
 
       // activate container
       digitalWrite(containerPin, HIGH);  //////////////////// OPEN CONTAINER HERE!
-
-      // message user about countdown time
-      Serial.println("The selected container will be opened for 3 seconds. Hurry up!");
       delay(3000);
 
       // deactivate container
@@ -265,8 +331,14 @@ void loop() {
       userState = 0;
 
       // message user to validate session
-      Serial.println();
-      Serial.println();
-      Serial.println("Pass card to validate new session");
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.setCursor(0,0);
+      display.print("Pass your card to validate new session");
+      display.display();
+      //Serial.println();
+      //Serial.println();
+      //Serial.println("Pass card to validate new session");
     }
   }
