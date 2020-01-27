@@ -1,4 +1,15 @@
-## Keypad input
+# Prototipo com arduino mega
+
+## Indice
+
+  * [00 Keypad input](#00-keypad-input)
+  * [01 RFID validation](#01-rfid-validation)
+  * [02 OLED display](#02-oled-display)
+  * [03 Flash ESP01 with Arduino MEGA](#03-flash-esp01-with-arduino-mega)
+
+
+## 00 Keypad input
+[Voltar para índice](#indice)
 
   Objetivo: configurar VS Code para usar com arduino e adaptar codigo para ler input de keypad.
 
@@ -67,7 +78,8 @@
   * Cria esquema de ligacao simplificado usando Fritzing Software;
   * Salva imagem do esquema de ligacao com nome 'schematics' na pasta 'firmware/doc';
 
-## RFID Validation
+## 01 RFID validation
+[Voltar para índice](#indice)
 
   Objetivo: substituir push button por leitor RFID para validacao do usuario.
 
@@ -136,7 +148,8 @@
   * Substitui funcionalidade do push button por isCard do RFID.
     * Se cartao lido -> buttonState = HIGH
 
-## OLED Display
+## 02 OLED display
+[Voltar para índice](#indice)
 
   Objetivo: conectar OLED display ao circuito e transmitir mensagens por ele ao inves de usar o serial monitor;
 
@@ -780,3 +793,80 @@
         }
       }
     ```
+
+## 03 Flash ESP01 with Arduino MEGA
+[Voltar para índice](#indice)
+
+  Objetivo: gravar firmware do ESP01 usando Arduino MEGA para usa-lo como modulo WiFi. Obs.: isso so foi necessario por nao termos gravador disponivel no momento.
+
+  _Arduino IDE setup:_
+
+  * Open arduino IDE;
+  * Follow the steps in [this video](https://www.youtube.com/watch?v=rtsWLI4vTJk) to setup libraries and environment for esp8266;
+  * Select tools > board > generic ESP8266 board;    
+  * Write your code using Arduino IDE;
+    * Make sure to use Serial.println() to write test message to verify later if code is working;
+    * Use example code below (test-code-print-x.ino)
+
+    ```c++
+    // test-code-print-x
+
+    int x = 0;
+
+    void setup() {
+      // put your setup code here, to run once:
+      Serial.begin(115200);
+      delay(100);
+      Serial.println("Setup done");
+    }
+
+    void loop() {
+      // put your main code here, to run repeatedly:
+      Serial.println(x);
+      delay(1000);
+      x++; 
+
+    }
+    ```
+
+  * Export firmware to binare file within arduino IDE (sketch > export compiled binary);
+  * Close arduino IDE;
+
+  _Wiring_
+  
+  * Wire ESP01 to arduino MEGA (make sure to connect 'Reset' pin to 'GND' pin in arduino);    
+
+    ![](img/03-flash-esp01-circuit.PNG)
+    Source: [Most easiest & simple way to program ESP8266 01 Module via Arduino Firmware | ESP8266 projects](https://www.youtube.com/watch?v=rtsWLI4vTJk)
+
+    * When GPIO0 is connected to ground, ESP01 is set to programmable mode;
+    * When 'Reset' and 'GND' are connected in arduino, it is set to passive mode;
+  
+  _ESP8266 flasher:_
+
+  * Download esp8266_flasher;
+  * Connect arduino to USB port;
+  * Open esp8266_flasher.exe;
+  * Select port (check port in windows device manager);
+  * Select the binary file to flash;
+  * Click 'download';
+    * If it fails to connect, try disconnecting and reconnecting USB port;
+  * Wait until 100% of the bin file is flashed;
+  * Ignore message 'Failed to leave Flash mode';
+  * Close esp8266_flasher.exe;
+  * Disconnect arduino from USB port;
+  * Disconnect 'GPIO0' from 'GND';
+  * Disconnect 'Reset' pin from 'GND' in Arduino;
+  * Reconnect arduino to USB port;
+
+  _Check if code is working:_
+
+  * Open arduino, and select tools > board > generic ESP8266 board;
+  * Select appropriate port (check port in windows device manager);
+  * Open arduino ide > serial monitor;  
+  * Setup serial monitor according to baud rate defined in your code;
+
+    ![](img/03-flash-esp01-test-code.PNG)    
+
+  * Check if message is shown in serial monitor;
+    * Case nothing happens, try reconnecting arduino to USB port;
