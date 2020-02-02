@@ -6,6 +6,7 @@
   * [01 RFID validation](#01-rfid-validation)
   * [02 OLED display](#02-oled-display)
   * [03 Flash ESP01 with Arduino MEGA](#03-flash-esp01-with-arduino-mega)
+  * [04 Control MEGA from smartphone](#04-control-mega-from-smartphone)
 
 
 ## 00 Keypad input
@@ -870,3 +871,69 @@
 
   * Check if message is shown in serial monitor;
     * Case nothing happens, try reconnecting arduino to USB port;
+
+## 04 Control MEGA from smartphone
+[Voltar para índice](#indice)
+
+  Objetivo: enviar comando do celular para ser executado no arduino MEGA usando ESP01 como shield WiFi e blynk como API de comunicacao.
+
+  * Ref:
+    * Tutorial: https://www.youtube.com/watch?v=YLKEZtLhfZo&feature=youtu.be
+    * Blynk docs: http://docs.blynk.cc/#hardware-set-ups-arduino-esp8266-wifi-with-at-commands
+    * Blynk libraries: http://www.blynk.cc/getting-started/    
+
+  _Setup ESP01 e Arduino:_
+
+  * Instala AT firmware no ESP01:
+    * Baixa firmware: https://www.electrodragon.com/w/File:At_firmware_bin1.54.zip
+    * Instala firmware binario (AiThinker_ESP8266_DIO_8M_8M_20160615_V1.5.4.bin) usando esp8266 flasher e arduino MEGA;
+      * Link para flasher: https://drive.google.com/file/d/0B3dUKfqzZnlwVGc1YnFyUjgxelE/view;
+  
+  * Reconecta ESP01 ao arduino mega como modulo WiFi;
+
+    ![](img\04-control-mega-from-smartphone.PNG)
+
+  * Conecta led e resistor como no esquema acima;
+
+  * ATENCAO!!! USE FONTE EXTERNA OU DIVISOR DE TENSAO PARA ALIMENTAR ESP01 COM 3.3v POIS SHIELD PUXA MUITA CORRENTE E PODE QUEIMAR ARDUINO!!!!
+
+  * Ignore sensor de temperatura;
+
+  _Setup Blynk App:_
+
+  * Baixa aplicativo Blynk;
+  * Cria conta no aplicativo;
+  * Cria novo projeto;
+    * Registra nome do projeto;
+    * Seleciona 'Arduino Mega' como device;
+      Obs.: Estamos mandando demandas ao mega e nao ao ESP01. ESP01 funciona apenas como modulo WiFi ou dispositivo de comunicacao;
+    * Clica em 'create project';
+
+  * Verifica se recebeu mensagem de autenticacao via email conforme notificacao do app apos criar projeto;
+  * No aplicativo, clica na tela e adiciona um 'button' tipo 'digital' D40 tipo 'switch' com nome 'container 10';
+  * Adiciona elemento 'virtual display' tipo 'virtual' V5 com reading rate de '1sec' e nome 'Millis';
+
+  _Setup Blynk Web app:_
+
+  * Entra em www.blynk.cc;
+  * Segue passos em 'get started':
+    * Instala arduino libraries;
+    * Open example code builder: https://examples.blynk.cc/?board=ESP8266&shield=ESP8266%20WiFi&example=Widgets%2FTerminal
+      * Select board: Arduino Mega 2560;
+      * Connection: ESP8266 WiFi Shield;
+      * Add Auth Token (it should be in your email)
+      * Select example: Push Data;
+      * Copy the whole code to buffer (CTRL+C)
+
+  _Flash firmware to Arduino MEGA:_
+
+  * Open new sketch in arduino IDE;
+  * Cola codigo;
+  * Atualiza nome da rede wifi (ssid);
+  * Atualiza senha da rede wifi (pass);
+  * Pluga Arduino Mega na porta USB;
+
+
+
+
+  
