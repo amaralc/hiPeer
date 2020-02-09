@@ -870,3 +870,44 @@
 
   * Check if message is shown in serial monitor;
     * Case nothing happens, try reconnecting arduino to USB port;
+
+## Instala ESP32 no IDE do arduino
+
+  Objetivo: preparar IDE do arduino para gravar firmware na ESP32.
+
+  Card: https://trello.com/c/gEHdWkfE
+
+  * (Arduino IDE) Adiciona link no campo de URL em File > Preferences > Additional Boards manager URLs: `https://dl.espressif.com/dl/package_esp32_index.json, http://arduino.esp8266.com/stable/package_esp8266com_index.json`
+
+  Obs: Os endereços devem ser separados por vírgula e apontam para links que disponibilizam arquivos de instalação dos esp32 e esp8266. 
+
+  * (Arduino IDE) Instala placas em tools > board > boards manager:
+    * Busca por `esp8266` e instala `esp8266 by ESP8266 Community` ;
+    * Busca por `esp32` e instala `esp32 by Espressif Systems` ;
+  
+  * Cria código 'blink' de teste para gravar nas placas disponíveis:
+
+    ```cpp
+    void setup(){
+      pinMode(2, OUTPUT);
+    }
+
+    void loop(){
+        digitalWrite(2,HIGH);
+        delay(1000);
+        digitalWrite(2,LOW);
+        delay(1000);
+    }
+    ```
+
+    Obs: de maneira opcional, o código pode ser gerado em blocos no site http://easycoding.tn/;
+      * Para ESP32: http://easycoding.tn/esp32/demos/code/
+      * Para ESP8266: http://easycoding.tn/tuniot/demos/code/
+
+  * Pressiona 'upload' (seta) para gravar código na placa selecionada;
+    * ESP32: pressione botão 'boot' enquanto faz upload para ajustar placa para modo de gravação;
+    * ESP8266: pressione botão 'flash' enquanto faz upload para ajustar placa para modo de gravação;
+
+  * Referências:
+    * Instala ESP32 ao arduino: https://www.youtube.com/watch?v=mBaS3YnqDaU
+    * Blink internal LED: https://www.youtube.com/watch?v=lIxs7WG1j-U
