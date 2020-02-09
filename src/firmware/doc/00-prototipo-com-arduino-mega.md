@@ -919,3 +919,12 @@
   * Referências:
     * Instala ESP32 ao arduino: https://www.youtube.com/watch?v=mBaS3YnqDaU
     * Blink internal LED: https://www.youtube.com/watch?v=lIxs7WG1j-U
+
+## Implementa servidor http em ESP32
+
+  Objetivo: Testar implementação de servidor para piscar LEDs a partir de requisição web.
+
+  Card: https://trello.com/c/XnMByfCe
+
+  * Referências:
+    * Build an ESP32 Web Server with Arduino IDE: https://www.youtube.com/watch?v=ApGwxX6VVzk
