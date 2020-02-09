@@ -899,14 +899,22 @@
         delay(1000);
     }
     ```
-
+    
     Obs: de maneira opcional, o código pode ser gerado em blocos no site http://easycoding.tn/;
       * Para ESP32: http://easycoding.tn/esp32/demos/code/
       * Para ESP8266: http://easycoding.tn/tuniot/demos/code/
 
+  * Seleciona placa em 'tools' > 'board':
+    * Se ESP32: > 'ESP32 Dev Module' ;
+    * Se ESP8266: 'Generic ESP8266 Module';
+
+  * Seleciona porta em 'tools' > 'Port' ;
+
   * Pressiona 'upload' (seta) para gravar código na placa selecionada;
-    * ESP32: pressione botão 'boot' enquanto faz upload para ajustar placa para modo de gravação;
-    * ESP8266: pressione botão 'flash' enquanto faz upload para ajustar placa para modo de gravação;
+    * ESP32: 
+      * Pressione botão 'boot' enquanto faz upload para ajustar placa para modo de gravação;
+    * ESP8266: 
+      * Pressione botão 'flash' enquanto faz upload para ajustar placa para modo de gravação;
 
   * Referências:
     * Instala ESP32 ao arduino: https://www.youtube.com/watch?v=mBaS3YnqDaU
